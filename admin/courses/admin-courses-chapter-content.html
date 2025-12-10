@@ -539,10 +539,24 @@ height: 18px;
     function escapeHtmlAttr(str){ if(!str && str !== 0) return ''; return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
     function renderPanelLists(){
-      const ch = getCurrentChapter();
-      if (!ch.flashcards) ch.flashcards = [];
-      selSubjectName.textContent = SELECTED_SUBJECT ? (CONTENT.subjects[SELECTED_SUBJECT].name || '—') : '—';
-      selChapterName.textContent = ch ? (ch.title || '—') : '—';
+  const ch = getCurrentChapter();
+
+  // ⭐ Prevent crash if chapter is null
+  if (!ch) {
+    selSubjectName.textContent = SELECTED_SUBJECT ? (CONTENT.subjects[SELECTED_SUBJECT].name || '—') : '—';
+    selChapterName.textContent = '—';
+
+    document.getElementById("flashcardsList").innerHTML =
+      '<div class="small muted">Open a chapter to edit flashcards</div>';
+
+    return; // ⛔ STOP here so no error happens
+  }
+
+  // ⭐ Now it's safe — ensure flashcards exists
+  if (!ch.flashcards) ch.flashcards = [];
+
+  selSubjectName.textContent = SELECTED_SUBJECT ? (CONTENT.subjects[SELECTED_SUBJECT].name || '—') : '—';
+  selChapterName.textContent = ch.title || '—';
 
       // concepts
       conceptsList.innerHTML = '';
