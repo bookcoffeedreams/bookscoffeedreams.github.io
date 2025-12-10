@@ -328,6 +328,10 @@ height: 18px;
 <button id="addFlashcardBtn" class="btn btn-primary">
   <i class="fa-solid fa-plus"></i> Add Card
 </button>
+            <button id="saveFlashcardsBtn" class="btn btn-ghost mt-3">
+  <i class="fa-solid fa-floppy-disk"></i> Save Flashcards Only
+</button>
+
           </div>
         </div>
       </div>
@@ -961,6 +965,31 @@ document.getElementById("addFlashcardBtn").onclick = () => {
   ch.flashcards.push({ front: "", back: "", hint: "", image: "" });
   markDirty();
   renderPanelLists();
+};
+// Save only flashcards
+document.getElementById("saveFlashcardsBtn").onclick = async () => {
+  const ch = getCurrentChapter();
+  if (!ch) return Swal.fire("Select Chapter", "Open a chapter first", "warning");
+
+  try {
+    await updateDoc(doc(db, "courses", courseId), {
+      [`content.subjects.${SELECTED_SUBJECT}.chapters`]:
+        CONTENT.subjects[SELECTED_SUBJECT].chapters,
+      updatedAt: serverTimestamp()
+    });
+
+    Swal.fire({
+      icon: "success",
+      title: "Flashcards Saved",
+      timer: 1200,
+      showConfirmButton: false
+    });
+
+    markDirty(false); // resets unsaved-warning if needed
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error", "Failed to save flashcards", "error");
+  }
 };
 
   </script>
