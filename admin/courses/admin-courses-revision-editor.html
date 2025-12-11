@@ -3,10 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Revision Editor • BCD Admin</title>
+  <title>Revision Editor • BCD (Chapter UI)</title>
 
-  <!-- Tailwind (for quick layout) -->
+  <!-- Tailwind (quick) -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -22,168 +25,342 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
   <style>
+    /* Chapter Content Editor theme (light glass) adapted */
     :root{
-      --bg:#0b1220;
-      --panel:#0f1724;
-      --muted:#9aa3ad;
-      --accent:#6b21a8;
-      --card-grad: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      --bg-1: #FFFBFF;
+      --bg-2: #F3F7FF;
+      --accent-a: #A855F7; /* purple */
+      --accent-b: #6366F1; /* indigo */
+      --muted: #6b7280;
+      --glass: rgba(255,255,255,0.9);
+      --glass-border: rgba(99,102,241,0.06);
+      --text-dark: #0b1220;
     }
+
     html,body{height:100%}
     body{
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto;
       margin:0;
-      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-      background: linear-gradient(180deg,var(--bg), #071119);
-      color:#e6eef8;
+      background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      color:var(--text-dark);
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
+      overflow-y:overlay;
     }
-    .container{max-width:1280px;margin:28px auto;padding:20px;display:flex;gap:20px;align-items:flex-start;}
-    .left { width:320px; flex-shrink:0; display:flex; flex-direction:column; gap:16px; }
-    .right { flex:1; display:flex; flex-direction:column; gap:16px; }
 
-    .panel { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); padding:14px; border-radius:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+    .glow {
+      position:fixed;
+      filter: blur(80px);
+      opacity:0.9;
+      z-index:0;
+      pointer-events:none;
+    }
+    .glow.g1{ width:420px; height:420px; top:-80px; left:-80px; background: radial-gradient(circle at 30% 30%, rgba(168,85,247,0.28), rgba(99,102,241,0.14), transparent 40%); }
+    .glow.g2{ width:360px; height:360px; bottom:-60px; right:-40px; background: radial-gradient(circle at 70% 70%, rgba(99,102,241,0.22), rgba(34,211,238,0.10), transparent 40%); }
 
-    h1 { font-size:20px; margin:0 0 4px 0; font-weight:800; color: #fff; }
-    .muted { color:var(--muted); font-size:13px; }
+    .app-shell{ display:flex; height:100vh; position:relative; z-index:1; }
+    .app-sidebar{
+      width:260px;
+      padding:22px;
+      box-sizing:border-box;
+      position:sticky;
+      top:24px;
+      height:calc(100vh - 48px);
+    }
 
-    .block-btn { display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:10px; cursor:pointer; border:1px solid rgba(255,255,255,0.03); background:transparent; }
-    .block-btn:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(107,33,168,0.06); }
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.92));
+      border-radius:14px;
+      box-shadow: 0 6px 30px rgba(20,24,40,0.06);
+      border:1px solid var(--glass-border);
+      padding:16px;
+    }
 
-    .blocks-list { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+    header.app-header {
+      height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:0 22px;
+      margin:18px;
+    }
+    .header-left{ display:flex; align-items:center; gap:12px; }
+    .back-btn {
+      display:flex; align-items:center; gap:8px;
+      background:transparent; border:0; cursor:pointer; padding:8px; border-radius:10px;
+    }
+    .back-btn:hover{ background: rgba(0,0,0,0.03) }
 
-    /* editor area */
+    .header-title{ font-weight:800; font-size:18px; color:var(--text-dark); }
+    .header-sub{ font-size:13px; color:var(--muted); margin-left:6px; font-weight:600; }
+
+    .header-right{ display:flex; align-items:center; gap:12px; }
+
+    .profile-btn{
+      display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:12px;
+      background:linear-gradient(90deg,var(--accent-a),var(--accent-b)); color:white; font-weight:700;
+      cursor:pointer; border:0;
+    }
+
+    .nav-item { display:flex; align-items:center; gap:12px; padding:10px; border-radius:10px; cursor:pointer; color:var(--text-dark); font-weight:700; }
+    .nav-item:hover{ background:rgba(99,102,241,0.06); }
+    .nav-item .icon { width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; background:linear-gradient(135deg, rgba(168,85,247,0.12), rgba(99,102,241,0.12)); color:var(--accent-b); }
+
+    .main { flex:1; padding:22px; overflow:auto; box-sizing:border-box; position:relative; }
+
+    .panel { padding:18px; border-radius:12px; background:rgba(255,255,255,0.95); border:1px solid rgba(99,102,241,0.06); box-shadow:0 6px 24px rgba(16,24,40,0.04); }
+
+    .muted { color:var(--muted); }
+    .pill { background:transparent; border:1px solid rgba(16,24,40,0.06); padding:10px; border-radius:10px; color:var(--text-dark); }
+    .input { width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(16,24,40,0.06); background:rgba(255,255,255,0.9); box-sizing:border-box; font-weight:600; color:var(--text-dark); }
+    .input:focus{ outline:none; box-shadow:0 8px 30px rgba(99,102,241,0.06); border-color:rgba(99,102,241,0.18); }
+
+    .btn { padding:8px 12px; border-radius:10px; font-weight:700; cursor:pointer; border:0; }
+    .btn-ghost { background:transparent; border:1px solid rgba(16,24,40,0.05); color:var(--text-dark); }
+    .btn-primary { background:linear-gradient(90deg,var(--accent-a),var(--accent-b)); color:white; box-shadow: 0 10px 30px rgba(99,102,241,0.08); }
+
+    .list-item {
+      background:rgba(255,255,255,0.98);
+      border-radius:10px;
+      padding:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border:1px solid rgba(16,24,40,0.03);
+      list-style: none !important;
+      position: relative;
+      padding-left: 36px;
+    }
+
+    .thumb { width:56px; height:56px; object-fit:cover; border-radius:8px; background:linear-gradient(135deg, rgba(99,102,241,0.06), rgba(168,85,247,0.06)); display:block; }
+    .small { font-size:13px; color:var(--muted); }
+    .hr { height:1px; background:rgba(16,24,40,0.04); margin:10px 0; border-radius:2px; }
+
+    /* Tabs style 3 (glass card tabs) */
+    .tabs-row { display:flex; gap:12px; margin-bottom:12px; }
+    .tab-card {
+      padding:10px 14px; border-radius:12px; cursor:pointer; background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
+      border:1px solid rgba(16,24,40,0.04); box-shadow: 0 6px 18px rgba(16,24,40,0.03); font-weight:800;
+      display:inline-flex; gap:8px; align-items:center;
+    }
+    .tab-card.active { border:1px solid rgba(99,102,241,0.12); box-shadow: 0 10px 30px rgba(99,102,241,0.06); }
+
+    .hidden { display:none; }
+
+    @media (max-width:1024px){
+      .app-sidebar{ display:none; }
+      header.app-header{ margin:12px; }
+      .main { padding:12px; }
+    }
+
+    .fade-in { animation: fadeIn 360ms ease both; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(6px) } to { opacity:1; transform:none } }
+
+    /* Revision Editor specific adjustments (matching Chapter UI look) */
+    .rev-left { width:320px; flex-shrink:0; display:flex; flex-direction:column; gap:16px; }
+    .rev-right { flex:1; display:flex; flex-direction:column; gap:16px; }
+
+    /* block palette styles matched to chapter look */
+    .block-btn { display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:10px; cursor:pointer; border:1px solid rgba(16,24,40,0.04); background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96)); color:var(--text-dark); font-weight:700; }
+    .block-btn:hover { background:linear-gradient(180deg, rgba(249,250,251,1), rgba(255,255,255,0.98)); box-shadow: 0 8px 30px rgba(99,102,241,0.04); transform:translateY(-2px); }
+
+    .blocks-list { display:flex; flex-direction:column; gap:8px; margin-top:6px; max-height:45vh; overflow:auto; padding-right:6px; }
+
+    /* editor area styles */
     .editor-toolbar { display:flex; gap:8px; align-items:center; justify-content:space-between; }
-    .editor-canvas { min-height:480px; max-height:75vh; overflow:auto; padding:12px; border-radius:10px; border:1px dashed rgba(255,255,255,0.03); background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent); }
+    .editor-canvas { min-height:360px; max-height:65vh; overflow:auto; padding:12px; border-radius:10px; border:1px dashed rgba(16,24,40,0.04); background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96)); }
 
-    .block-card { background: linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.002)); border-radius:10px; padding:12px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.02); display:flex; gap:12px; align-items:flex-start; }
+    .block-card { background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.97)); border-radius:10px; padding:12px; margin-bottom:10px; border:1px solid rgba(16,24,40,0.03); display:flex; gap:12px; align-items:flex-start; }
     .block-card .meta { width:120px; min-width:120px; font-size:13px; color:var(--muted); }
     .block-card .body { flex:1; min-width:0; }
     .block-actions { display:flex; gap:6px; align-items:center; }
 
-    .input, textarea, select { width:100%; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); background:transparent; color:#e6eef8; font-size:13px; }
+    .input, textarea, select { width:100%; padding:8px 10px; border-radius:8px; border:1px solid rgba(16,24,40,0.04); background:rgba(255,255,255,0.94); color:var(--text-dark); font-size:13px; }
     textarea { min-height:84px; resize:vertical; }
 
     .small { font-size:12px; color:var(--muted); }
 
-    .btn { padding:8px 10px; border-radius:8px; font-weight:700; cursor:pointer; border:1px solid rgba(255,255,255,0.03); background:transparent; color:#fff; }
-    .btn-primary { background:linear-gradient(90deg,var(--accent),#4f46e5); border:none; box-shadow:0 8px 30px rgba(79,70,229,0.08); }
+    .btn { padding:8px 10px; border-radius:8px; font-weight:700; cursor:pointer; border:1px solid rgba(16,24,40,0.04); background:transparent; color:var(--text-dark); }
+    .btn-primary { background:linear-gradient(90deg,var(--accent-a),var(--accent-b)); border:none; color:white; box-shadow:0 8px 30px rgba(99,102,241,0.08); }
     .btn-ghost { background:transparent; }
-    .pill { padding:6px 8px; border-radius:999px; background:rgba(255,255,255,0.02); }
 
-    .toggle { display:inline-flex; gap:8px; align-items:center; }
-
-    .preview { background:#020617; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); }
+    .preview { background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96)); padding:12px; border-radius:8px; border:1px solid rgba(16,24,40,0.04); color:var(--text-dark); }
 
     .hint { font-size:12px; color:var(--muted); margin-top:6px; }
 
-    /* responsive */
-    @media (max-width:1024px){ .container{flex-direction:column;} .left{width:100%;} }
+    @media (max-width:1024px){
+      .rev-left{ width:100%; } 
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- left palette -->
-    <div class="left">
-      <div class="panel">
-        <h1>Revision Blocks</h1>
-        <div class="muted">Add blocks to build the revision note (All blocks included)</div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
 
-        <div class="blocks-list" id="blockPalette">
-          <div class="block-btn" data-type="heading"><i class="fa-solid fa-heading"></i> <div><div style="font-weight:700">Heading</div><div class="small muted">H1/H2/H3</div></div></div>
-          <div class="block-btn" data-type="paragraph"><i class="fa-solid fa-paragraph"></i> <div><div style="font-weight:700">Paragraph</div><div class="small muted">Rich paragraph</div></div></div>
-          <div class="block-btn" data-type="image"><i class="fa-solid fa-image"></i> <div><div style="font-weight:700">Image</div><div class="small muted">Upload/copy URL</div></div></div>
-          <div class="block-btn" data-type="imageText"><i class="fa-solid fa-columns"></i> <div><div style="font-weight:700">Image + Text</div><div class="small muted">Side-by-side</div></div></div>
-          <div class="block-btn" data-type="bullets"><i class="fa-solid fa-list"></i> <div><div style="font-weight:700">Bullet List</div><div class="small muted">Multiple bullets</div></div></div>
-          <div class="block-btn" data-type="numbered"><i class="fa-solid fa-list-ol"></i> <div><div style="font-weight:700">Numbered List</div><div class="small muted">Ordered</div></div></div>
-          <div class="block-btn" data-type="keypoints"><i class="fa-solid fa-star"></i> <div><div style="font-weight:700">Important Points</div><div class="small muted">Toggle ON/OFF</div></div></div>
-          <div class="block-btn" data-type="confusions"><i class="fa-solid fa-question-circle"></i> <div><div style="font-weight:700">Common Confusions</div><div class="small muted">Toggle ON/OFF</div></div></div>
-          <div class="block-btn" data-type="formulas"><i class="fa-solid fa-superscript"></i> <div><div style="font-weight:700">Formula Sheet</div><div class="small muted">LaTeX/KaTeX</div></div></div>
-          <div class="block-btn" data-type="tableImage"><i class="fa-solid fa-table"></i> <div><div style="font-weight:700">Table / Flowchart</div><div class="small muted">Image or grid</div></div></div>
-          <div class="block-btn" data-type="example"><i class="fa-solid fa-lightbulb"></i> <div><div style="font-weight:700">Example</div><div class="small muted">Worked example</div></div></div>
-          <div class="block-btn" data-type="warning"><i class="fa-solid fa-triangle-exclamation"></i> <div><div style="font-weight:700">Warning / Pitfall</div><div class="small muted">Highlight mistakes</div></div></div>
-        </div>
-
-        <div class="hr" style="height:1px;background:rgba(255,255,255,0.02);margin:12px 0;border-radius:2px"></div>
-
-        <div style="display:flex;gap:8px;align-items:center;">
-          <div style="flex:1">
-            <div class="small muted">Subject</div>
-            <select id="subjectSelect" class="input" style="background:transparent;"></select>
-          </div>
-          <div style="width:10px"></div>
-        </div>
-
-        <div style="margin-top:8px">
-          <div class="small muted">Chapter</div>
-          <select id="chapterSelect" class="input" style="background:transparent;"></select>
-          <div class="hint">Open a chapter to edit its revision notes (this page uses ?id=&lt;courseId&gt; like other pages)</div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h1>Quick Actions</h1>
-        <div class="muted">Upload / templates</div>
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <button id="uploadImageGlobal" class="btn btn-ghost"><i class="fa-solid fa-upload"></i> Upload Image</button>
-          <button id="insertTemplateKeypoints" class="btn btn-primary">Keypoints Template</button>
-        </div>
-        <div class="hint">Use template to prefill common structures</div>
-      </div>
-
-      <div class="panel">
-        <h1>Save / Export</h1>
-        <div class="muted">Save changes to course</div>
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <button id="saveBtn" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-          <button id="exportJSON" class="btn">Export JSON</button>
-        </div>
-        <div style="margin-top:8px" class="small muted">Course ID: <span id="courseIdDisplay" class="pill">—</span></div>
+  <!-- Header (same as Chapter Content Editor) -->
+  <header class="app-header">
+    <div class="header-left">
+      <button class="back-btn glass" id="backArrow" title="Go back">
+        <i class="fa-solid fa-arrow-left" style="color:var(--accent-b);"></i>
+        <div style="font-weight:700; color:var(--text-dark)">Back</div>
+      </button>
+      <div>
+        <div class="header-title">Revision Editor — BCD</div>
+        <div class="header-sub">Build revision notes using blocks</div>
       </div>
     </div>
 
-    <!-- right editor -->
-    <div class="right">
-      <div class="panel">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div class="header-right">
+      <div class="small muted">Course ID:</div>
+      <div id="courseIdDisplay" class="pill">—</div>
+      <button id="saveBtnTop" class="btn btn-primary">Save</button>
+      <img id="profilePic" class="w-10 h-10 rounded-full object-cover border border-white/20 cursor-pointer hover:opacity-80 transition" src="" alt="Profile">
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <!-- Sidebar (chapter-style) -->
+    <aside class="app-sidebar">
+      <div class="glass panel">
+        <div style="font-weight:800; font-size:14px; margin-bottom:12px">Navigation</div>
+
+        <nav class="space-y-2">
+          <a href="dashboard.html" class="nav-item">
+            <span class="icon"><i class="fa-solid fa-house"></i></span>
+            <span>Home</span>
+          </a>
+
+          <a href="manage-courses.html" class="nav-item">
+            <span class="icon"><i class="fa-solid fa-graduation-cap"></i></span>
+            <span>Courses</span>
+          </a>
+
+          <a href="#" class="nav-item" aria-current="page" style="background:linear-gradient(180deg, rgba(168,85,247,0.06), rgba(99,102,241,0.04));">
+            <span class="icon"><i class="fa-solid fa-pen-to-square"></i></span>
+            <span>Revision Editor</span>
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main content area -->
+    <main class="main">
+      <!-- Top controls (subject + chapter) -->
+      <div class="panel fade-in mb-6">
+        <div class="flex items-center justify-between">
           <div>
-            <h1>Revision Note Editor</h1>
-            <div class="muted">Build rich revision notes with blocks — live preview & KaTeX support</div>
+            <div style="font-weight:800; font-size:18px; display:flex; gap:10px; align-items:center">
+              <img src="https://github.com/bookscoffeedreams/bookscoffeedreams.github.io/blob/main/assets/icons/hashtag_2.png?raw=true" style="width:20px;height:20px;object-fit:contain;opacity:.9" />
+              Revision Note Hub
+            </div>
+            <div class="small muted">Create revision notes for a chapter. Uses KaTeX for formulas.</div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <label class="toggle small muted"><input type="checkbox" id="previewToggle" checked/> Live Preview</label>
-            <button id="undoBtn" class="btn">Undo</button>
-            <button id="redoBtn" class="btn">Redo</button>
-          </div>
-        </div>
 
-        <div class="editor-toolbar" style="margin-top:12px;">
-          <div class="small muted">Editor canvas</div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button id="addBlockBtn" class="btn">Add Block</button>
-            <button id="clearAllBlocks" class="btn">Clear All</button>
+          <div style="min-width:320px" class="flex items-center gap-3">
+            <select id="subjectSelect" class="input" style="max-width:280px"></select>
+            <select id="chapterSelect" class="input" style="max-width:220px"></select>
+            <button id="saveBtn" class="btn btn-primary">Save</button>
           </div>
-        </div>
-
-        <div class="editor-canvas" id="editorCanvas" style="margin-top:12px;">
-          <!-- blocks will be rendered here -->
         </div>
       </div>
 
-      <div class="panel">
-        <h1>Preview</h1>
-        <div id="previewArea" class="preview" style="min-height:180px;"></div>
+      <!-- Main editor area: left palette + right editor & preview -->
+      <div class="panel mb-6" style="display:flex;gap:16px;align-items:flex-start;">
+        <!-- Left palette (styled like chapter panels) -->
+        <div class="rev-left">
+          <div class="panel">
+            <div style="font-weight:800; display:flex; gap:8px; align-items:center">
+              <img src="https://github.com/bookscoffeedreams/bookscoffeedreams.github.io/blob/main/assets/icons/selection.png?raw=true" style="width:18px;height:18px" />
+              <span>Revision Blocks</span>
+            </div>
+            <div class="small muted">Add blocks to build the revision note (All blocks included)</div>
+
+            <div class="blocks-list" id="blockPalette" style="margin-top:12px">
+              <div class="block-btn" data-type="heading"><i class="fa-solid fa-heading"></i> <div><div style="font-weight:700">Heading</div><div class="small muted">H1/H2/H3</div></div></div>
+              <div class="block-btn" data-type="paragraph"><i class="fa-solid fa-paragraph"></i> <div><div style="font-weight:700">Paragraph</div><div class="small muted">Rich paragraph</div></div></div>
+              <div class="block-btn" data-type="image"><i class="fa-solid fa-image"></i> <div><div style="font-weight:700">Image</div><div class="small muted">Upload/copy URL</div></div></div>
+              <div class="block-btn" data-type="imageText"><i class="fa-solid fa-columns"></i> <div><div style="font-weight:700">Image + Text</div><div class="small muted">Side-by-side</div></div></div>
+              <div class="block-btn" data-type="bullets"><i class="fa-solid fa-list"></i> <div><div style="font-weight:700">Bullet List</div><div class="small muted">Multiple bullets</div></div></div>
+              <div class="block-btn" data-type="numbered"><i class="fa-solid fa-list-ol"></i> <div><div style="font-weight:700">Numbered List</div><div class="small muted">Ordered</div></div></div>
+              <div class="block-btn" data-type="keypoints"><i class="fa-solid fa-star"></i> <div><div style="font-weight:700">Important Points</div><div class="small muted">Toggle ON/OFF</div></div></div>
+              <div class="block-btn" data-type="confusions"><i class="fa-solid fa-question-circle"></i> <div><div style="font-weight:700">Common Confusions</div><div class="small muted">Toggle ON/OFF</div></div></div>
+              <div class="block-btn" data-type="formulas"><i class="fa-solid fa-superscript"></i> <div><div style="font-weight:700">Formula Sheet</div><div class="small muted">LaTeX/KaTeX</div></div></div>
+              <div class="block-btn" data-type="tableImage"><i class="fa-solid fa-table"></i> <div><div style="font-weight:700">Table / Flowchart</div><div class="small muted">Image or grid</div></div></div>
+              <div class="block-btn" data-type="example"><i class="fa-solid fa-lightbulb"></i> <div><div style="font-weight:700">Example</div><div class="small muted">Worked example</div></div></div>
+              <div class="block-btn" data-type="warning"><i class="fa-solid fa-triangle-exclamation"></i> <div><div style="font-weight:700">Warning / Pitfall</div><div class="small muted">Highlight mistakes</div></div></div>
+            </div>
+
+            <div class="hr" style="margin-top:12px"></div>
+
+            <div style="margin-top:8px">
+              <div class="small muted">Quick Actions</div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button id="uploadImageGlobal" class="btn btn-ghost"><i class="fa-solid fa-upload"></i> Upload Image</button>
+                <button id="insertTemplateKeypoints" class="btn btn-primary">Keypoints Template</button>
+              </div>
+              <div class="hint">Use template to prefill common structures</div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-weight:800">Save / Export</div>
+              <div class="small muted">Course actions</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <button id="saveBtnLeft" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+              <button id="exportJSON" class="btn btn-ghost">Export JSON</button>
+            </div>
+            <div style="margin-top:8px" class="small muted">Course ID: <span id="courseIdDisplaySmall" class="pill">—</span></div>
+          </div>
+        </div>
+
+        <!-- Right editor & preview -->
+        <div class="rev-right" style="flex:1">
+          <div class="panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-weight:800; font-size:18px">Revision Note Editor</div>
+                <div class="small muted">Build rich revision notes with blocks — live preview & KaTeX support</div>
+              </div>
+
+              <div style="display:flex;gap:8px;align-items:center;">
+                <label class="toggle small muted"><input type="checkbox" id="previewToggle" checked/> Live Preview</label>
+                <button id="undoBtn" class="btn">Undo</button>
+                <button id="redoBtn" class="btn">Redo</button>
+              </div>
+            </div>
+
+            <div class="editor-toolbar" style="margin-top:12px;">
+              <div class="small muted">Editor canvas</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button id="addBlockBtn" class="btn">Add Block</button>
+                <button id="clearAllBlocks" class="btn">Clear All</button>
+              </div>
+            </div>
+
+            <div class="editor-canvas" id="editorCanvas" style="margin-top:12px;">
+              <!-- blocks will be rendered here -->
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-weight:800">Preview</div>
+            <div id="previewArea" class="preview" style="min-height:180px; margin-top:8px;"></div>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 
-  <!-- FIREBASE + LOGIC -->
+  <!-- FIREBASE + LOGIC (Revision Editor core preserved, adapted to this page) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
-      getFirestore, doc, getDoc, updateDoc, setDoc, collection, serverTimestamp
+      getFirestore, doc, getDoc, updateDoc, setDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { requirePermission } from "/admin/guard-v10.js";
 
     // ---------- CONFIG ----------
@@ -197,7 +374,6 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
 
     // Cloudinary
     const CLOUD_NAME = 'dkxuilgai';
@@ -232,8 +408,11 @@
     const blockPalette = document.getElementById('blockPalette');
     const editorCanvas = document.getElementById('editorCanvas');
     const previewArea = document.getElementById('previewArea');
-    const saveBtn = document.getElementById('saveBtn');
+    const saveBtn = document.getElementById('saveBtn'); // top right save inside panel (exists)
+    const saveBtnTop = document.getElementById('saveBtnTop'); // header save
+    const saveBtnLeft = document.getElementById('saveBtnLeft'); // left save
     const courseIdDisplay = document.getElementById('courseIdDisplay');
+    const courseIdDisplaySmall = document.getElementById('courseIdDisplaySmall');
     const subjectSelect = document.getElementById('subjectSelect');
     const chapterSelect = document.getElementById('chapterSelect');
     const uploadImageGlobal = document.getElementById('uploadImageGlobal');
@@ -244,6 +423,10 @@
     const exportJSON = document.getElementById('exportJSON');
     const undoBtn = document.getElementById('undoBtn');
     const redoBtn = document.getElementById('redoBtn');
+
+    // small helpers (escape)
+    function escapeHtml(s=''){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+    function escapeAttr(s=''){ return String(s||'').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
 
     // ---------- Helpers ----------
     function uid(pref='b'){ return pref + '_' + Math.random().toString(36).slice(2,9); }
@@ -300,7 +483,6 @@
       });
     });
     addBlockBtn.addEventListener('click', ()=> {
-      // show quick add menu (default to paragraph)
       addBlock('paragraph');
     });
 
@@ -317,7 +499,7 @@
     function renderEditor(){
       editorCanvas.innerHTML = '';
       if(!BLOCKS.length){
-        editorCanvas.innerHTML = `<div class="muted">No blocks yet — use the left palette to add blocks.</div>`;
+        editorCanvas.innerHTML = `<div class="small muted">No blocks yet — use the left palette to add blocks.</div>`;
         return;
       }
 
@@ -342,7 +524,7 @@
 
         const body = card.querySelector(`#body_${b.id}`);
 
-        // render block-specific controls
+        // render block-specific controls (same as original revision editor)
         if(b.type === 'heading'){
           body.innerHTML = `
             <div style="display:flex;gap:8px;">
@@ -435,7 +617,7 @@
         } else if(b.type === 'warning'){
           body.innerHTML = `<textarea class="input" data-prop="text">${escapeHtml(b.text||'')}</textarea>`;
         } else {
-          body.innerHTML = `<div class="muted">Unknown block type</div>`;
+          body.innerHTML = `<div class="small muted">Unknown block type</div>`;
         }
 
         // attach events in this block
@@ -473,7 +655,6 @@
               renderEditor(); renderPreview(); markDirty();
             });
           } else if(act === 'addItem'){
-            // find input
             const inp = cardEl.querySelector('[data-add]');
             const val = inp && inp.value.trim();
             if(val){
@@ -506,8 +687,12 @@
       cardEl.querySelectorAll('input[data-prop], textarea[data-prop], select[data-prop]').forEach(inp=>{
         inp.addEventListener('input', ()=> {
           const prop = inp.dataset.prop;
-          if(inp.type === 'checkbox') block[prop] = inp.checked;
-          else block[prop] = inp.value;
+          if(inp.type === 'checkbox') {
+            // checkboxes inside these blocks may appear as input[type=checkbox] but not using data-prop in HTML
+            block[prop] = inp.checked;
+          } else {
+            block[prop] = inp.value;
+          }
           renderPreview();
           markDirty();
         });
@@ -538,20 +723,17 @@
           markDirty();
         });
       });
-
-      // add item via input + add button handled above
     }
 
     // ---------- Render preview ----------
     function renderPreview(){
-      if(!previewToggle.checked){ previewArea.innerHTML = '<div class="muted">Preview is disabled</div>'; return; }
+      if(!previewToggle.checked){ previewArea.innerHTML = '<div class="small muted">Preview is disabled</div>'; return; }
       let html = '';
       BLOCKS.forEach(b=>{
         html += renderBlockToHTML(b);
       });
       previewArea.innerHTML = html;
       // render formulas with KaTeX
-      // find elements with data-katex and render
       previewArea.querySelectorAll('[data-katex]').forEach(el=>{
         const tex = el.dataset.katex;
         try{
@@ -566,22 +748,22 @@
       if(b.type === 'heading'){
         const lvl = b.level || 1;
         const tag = lvl===1? 'h1' : lvl===2? 'h2' : 'h3';
-        return `<${tag} style="margin:8px 0;color:#fff">${escapeHtml(b.text||'')}</${tag}>`;
+        return `<${tag} style="margin:8px 0;color:var(--text-dark);font-weight:800">${escapeHtml(b.text||'')}</${tag}>`;
       } else if(b.type === 'paragraph'){
-        return `<div style="margin:6px 0;line-height:1.5;color:#dbeafe">${escapeHtml(b.text||'')}</div>`;
+        return `<div style="margin:6px 0;line-height:1.5;color:var(--text-dark)">${escapeHtml(b.text||'')}</div>`;
       } else if(b.type === 'image'){
         return `<div style="margin:10px 0;"><img src="${escapeAttr(b.url||'')}" style="max-width:100%;border-radius:8px"/><div class="small muted">${escapeHtml(b.caption||'')}</div></div>`;
       } else if(b.type === 'imageText'){
         const left = b.imageLeft !== false;
         const imgHtml = `<img src="${escapeAttr(b.imageUrl||'')}" style="width:220px;height:auto;border-radius:8px;object-fit:cover" onerror="this.style.display='none'"/>`;
-        const txtHtml = `<div style="padding:6px 8px;color:#dbeafe">${escapeHtml(b.text||'')}</div>`;
+        const txtHtml = `<div style="padding:6px 8px;color:var(--text-dark)">${escapeHtml(b.text||'')}</div>`;
         return `<div style="display:flex;gap:12px;align-items:flex-start;margin:10px 0">${ left ? imgHtml + txtHtml : txtHtml + imgHtml }</div>`;
       } else if(b.type === 'bullets'){
         const items = (b.items||[]).map(i=>`<li>${escapeHtml(i)}</li>`).join('');
-        return `<ul style="margin:8px 0 8px 18px;color:#dbeafe">${items}</ul>`;
+        return `<ul style="margin:8px 0 8px 18px;color:var(--text-dark)">${items}</ul>`;
       } else if(b.type === 'numbered'){
         const items = (b.items||[]).map(i=>`<li>${escapeHtml(i)}</li>`).join('');
-        return `<ol style="margin:8px 0 8px 18px;color:#dbeafe">${items}</ol>`;
+        return `<ol style="margin:8px 0 8px 18px;color:var(--text-dark)">${items}</ol>`;
       } else if(b.type === 'keypoints'){
         if(b.toggles?.visible === false) return '';
         const items = (b.items||[]).map(i=>`<li>${escapeHtml(i)}</li>`).join('');
@@ -603,28 +785,20 @@
       } else if(b.type === 'warning'){
         return `<div style="margin:10px 0;padding:10px;border-radius:8px;background:rgba(244,63,94,0.06);border-left:4px solid #ef4444"><strong>Warning</strong><div style="margin-top:6px">${escapeHtml(b.text||'')}</div></div>`;
       } else {
-        return `<div class="muted">Unknown block: ${escapeHtml(b.type)}</div>`;
+        return `<div class="small muted">Unknown block: ${escapeHtml(b.type)}</div>`;
       }
     }
 
-    // ---------- Utility escape ----------
-    function escapeHtml(s=''){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-    function escapeAttr(s=''){ return String(s||'').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
-
     // ---------- Save / Load ----------
-
-    saveBtn.addEventListener('click', saveRevisionContent);
     async function saveRevisionContent(){
       if(!courseId) return Swal.fire('Missing course ID','Open page with ?id=<courseId>','error');
       if(!SELECTED_SUBJECT_ID || !SELECTED_CHAPTER_ID) return Swal.fire('Select chapter','Choose subject & chapter to save revision notes','warning');
       if(saveLock) return;
       saveLock = true;
       try{
-        // load existing course doc to avoid overwriting other fields
         const courseRef = doc(db,'courses',courseId);
         const snap = await getDoc(courseRef);
         const courseData = snap.exists() ? snap.data() : {};
-        // ensure structure
         const revision = courseData.revision || { subjects:{} };
         if(!revision.subjects) revision.subjects = {};
         revision.subjects[SELECTED_SUBJECT_ID] = revision.subjects[SELECTED_SUBJECT_ID] || { chapters:{} };
@@ -638,6 +812,11 @@
         Swal.fire('Error','Failed to save revision notes','error');
       } finally { saveLock = false; }
     }
+
+    // wire save buttons
+    saveBtn?.addEventListener('click', saveRevisionContent);
+    saveBtnTop?.addEventListener('click', saveRevisionContent);
+    saveBtnLeft?.addEventListener('click', saveRevisionContent);
 
     exportJSON.addEventListener('click', ()=>{
       const json = JSON.stringify({ subject: SELECTED_SUBJECT_ID, chapter: SELECTED_CHAPTER_ID, blocks: BLOCKS }, null, 2);
@@ -655,38 +834,31 @@
         const snap = await getDoc(doc(db,'courses',id));
         if(!snap.exists()){ Swal.fire('Not found','Course not found','error'); return; }
         const data = snap.data();
-        // assume course has .content or .subjects or .revision structure; try to infer subjects & chapters
-        // Preferred: data.content.subjects (same pattern used previously) OR data.revision
         let subjectsSource = {};
         if(data.content && data.content.subjects) subjectsSource = data.content.subjects;
         else if(data.subjects) subjectsSource = data.subjects;
-        else subjectsSource = {}; // fallback: attempt to extract from revision if present
-
-        // build SUBJECTS_LIST from data.content.subjects or data.revision.subjects
+        else subjectsSource = {};
         if(Object.keys(subjectsSource).length){
           SUBJECTS_LIST = Object.keys(subjectsSource).map(id => ({ id, name: subjectsSource[id].name || subjectsSource[id].title || 'Unnamed' , meta: subjectsSource[id] }));
         } else if(data.revision && data.revision.subjects){
           SUBJECTS_LIST = Object.keys(data.revision.subjects).map(id => ({ id, name: data.revision.subjects[id].name || id, meta: data.revision.subjects[id] }));
         } else {
-          SUBJECTS_LIST = []; // no subjects found - still allow creating later
+          SUBJECTS_LIST = [];
         }
-
         CONTENT = data;
         courseId = id;
         courseIdDisplay.textContent = courseId;
+        courseIdDisplaySmall.textContent = courseId;
         populateSubjectSelect();
-        // load revision blocks for first selected subject/chapter if present
         if(SUBJECTS_LIST.length){
           SELECTED_SUBJECT_ID = SUBJECTS_LIST[0].id;
           populateChapterSelectFromSource();
         } else {
-          // no subjects - allow user to create by hand using other admin pages; BLOCKS empty
           SELECTED_SUBJECT_ID = null;
           SELECTED_CHAPTER_ID = null;
           BLOCKS = [];
           renderEditor(); renderPreview();
         }
-
         isDirty = false;
       }catch(err){
         console.error('load course err', err);
@@ -707,7 +879,6 @@
       chapterSelect.innerHTML = '';
       const courseData = CONTENT;
       let chaptersSource = null;
-      // prefer data.content.subjects[id].chapters
       if(courseData.content && courseData.content.subjects && courseData.content.subjects[SELECTED_SUBJECT_ID] && courseData.content.subjects[SELECTED_SUBJECT_ID].chapters){
         chaptersSource = courseData.content.subjects[SELECTED_SUBJECT_ID].chapters;
       } else if(courseData.revision && courseData.revision.subjects && courseData.revision.subjects[SELECTED_SUBJECT_ID] && courseData.revision.subjects[SELECTED_SUBJECT_ID].chapters){
@@ -717,18 +888,15 @@
         chaptersSource = [];
       }
 
-      // chaptersSource can be array or object - normalize
       let chaptersNormalized = [];
       if(Array.isArray(chaptersSource)){
         chaptersNormalized = chaptersSource.map(ch => ({ id: ch.id || uid('ch'), title: ch.title || ch.name || 'Untitled' }));
       } else if(typeof chaptersSource === 'object'){
-        // if it's an object with keys
         if(Object.keys(chaptersSource).length){
           chaptersNormalized = Object.keys(chaptersSource).map(k => ({ id:k, title: chaptersSource[k].title || chaptersSource[k].name || k }));
         }
       }
 
-      // populate select
       chaptersNormalized.forEach(ch=>{
         const opt = document.createElement('option'); opt.value = ch.id; opt.textContent = ch.title; chapterSelect.appendChild(opt);
       });
@@ -739,7 +907,6 @@
         chapterSelect.onchange = ()=> { SELECTED_CHAPTER_ID = chapterSelect.value; loadRevisionBlocksForSelected(); };
         loadRevisionBlocksForSelected();
       } else {
-        // no chapters found - clear blocks
         SELECTED_CHAPTER_ID = null;
         BLOCKS = [];
         chapterSelect.innerHTML = '';
@@ -749,15 +916,13 @@
     }
 
     async function loadRevisionBlocksForSelected(){
-      // attempt to read from CONTENT.revision.subjects[subject].chapters[chapter].blocks
       if(!CONTENT) CONTENT = {};
       const revision = CONTENT.revision || {};
       if(revision.subjects && revision.subjects[SELECTED_SUBJECT_ID] && revision.subjects[SELECTED_SUBJECT_ID].chapters && revision.subjects[SELECTED_SUBJECT_ID].chapters[SELECTED_CHAPTER_ID]){
         BLOCKS = revision.subjects[SELECTED_SUBJECT_ID].chapters[SELECTED_CHAPTER_ID].blocks || [];
       } else {
-        BLOCKS = []; // start empty
+        BLOCKS = [];
       }
-      // ensure BLOCKS is deep-copied
       BLOCKS = JSON.parse(JSON.stringify(BLOCKS));
       history = { past: [], future: [] };
       renderEditor();
@@ -778,34 +943,50 @@
       renderEditor(); renderPreview(); markDirty();
     });
 
-    // clear all blocks
     clearAllBlocks.addEventListener('click', async ()=>{
       const r = await Swal.fire({ title:'Clear all blocks?', text:'This will remove all blocks in current chapter', icon:'warning', showCancelButton:true });
       if(r.isConfirmed){ pushHistory(BLOCKS); BLOCKS = []; renderEditor(); renderPreview(); markDirty(); }
     });
 
-    // undo/redo
     undoBtn.addEventListener('click', undo);
     redoBtn.addEventListener('click', redo);
 
-    // ---------- Small helpers & init ----------
     window.addEventListener('beforeunload', (e)=> { if(isDirty){ e.preventDefault(); e.returnValue=''; } });
 
     // NEW PERMISSION GUARD
-const { user, role } = await requirePermission("manageSubjects");
+    (async ()=>{
+      const perm = await requirePermission("manageSubjects");
+      const user = perm.user || perm?.currentUser || null;
+      const role = perm.role || perm?.userRole || null;
 
-// get course id
-const idParam = getQueryParam("id");
-if(!idParam){
-  Swal.fire("Missing id","Open this page with ?id=<courseId>","warning");
-} else {
-  courseId = idParam;
-  courseIdDisplay.textContent = courseId;
-  await loadCourseAndRevision(courseId);
-}
+      // profile pic
+      const profilePic = document.getElementById("profilePic");
+      const defaultPic = "https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/assets/images/account_logo_default.png";
+      profilePic.src = user?.photoURL || role?.photoURL || defaultPic;
+      profilePic.onclick = ()=> window.location.href = 'profile.html';
 
-    // initial
+      const idParam = getQueryParam("id");
+      if(!idParam){
+        Swal.fire("Missing id","Open this page with ?id=<courseId>","warning");
+      } else {
+        courseId = idParam;
+        courseIdDisplay.textContent = courseId;
+        courseIdDisplaySmall.textContent = courseId;
+        await loadCourseAndRevision(courseId);
+      }
+    })();
+
+    // header back arrow
+    document.getElementById('backArrow').onclick = ()=> {
+      if (window.history.length > 1) window.history.back();
+      else window.location.href = 'admin-subjects.html';
+    };
+
+    // preview toggle wiring
     previewToggle.addEventListener('change', ()=> renderPreview());
+
+    // keyboard save
+    window.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); saveRevisionContent(); } });
   </script>
 </body>
 </html>
