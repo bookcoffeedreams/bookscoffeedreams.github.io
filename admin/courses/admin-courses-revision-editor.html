@@ -425,7 +425,7 @@
 
     // ---------- Block factory ----------
     function defaultBlock(type){
-      const base = { id: uid('blk'), type, meta:{}, toggles:{} };
+      const base = { id: uid('blk'), type, meta:{}, toggles:{}, categories: [] };
       switch(type){
         case 'heading': return {...base, level:1, text:'Heading text' };
         case 'paragraph': return {...base, text:'Write explanation here...' };
@@ -433,10 +433,10 @@
         case 'imageText': return {...base, imageUrl:'', text:'Explanation for image', imageLeft:true };
         case 'bullets': return {...base, items: ['Point 1','Point 2'] };
         case 'numbered': return {...base, items: ['Step 1','Step 2'] };
-        case 'keypoints': return {...base, items: ['Key 1','Key 2'], toggles:{visible:true} };
-        case 'confusions': return {...base, items: ['Confusion 1'], toggles:{visible:true} };
-        case 'formulas': return {...base, formulas: ['E=mc^2','F = ma'], toggles:{visible:true} };
-        case 'tableImage': return {...base, url:'', caption:'', toggles:{visible:true} };
+        case 'keypoints': return {...base, items: ['Key 1','Key 2'] };
+        case 'confusions': return {...base, items: ['Confusion 1']};
+        case 'formulas': return {...base, formulas: ['E=mc^2','F = ma']};
+        case 'tableImage': return {...base, url:'', caption:''};
         case 'example': return {...base, title:'Example', steps:['Step 1','Solution...'] };
         case 'warning': return {...base, text:'Watch out for this common error' };
         default: return {...base};
@@ -495,6 +495,17 @@
         // render block-specific controls (same as original revision editor)
         if(b.type === 'heading'){
           body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+    <div style="margin-bottom:10px;">
+      <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <label class="toggle small muted"><input type="checkbox" data-cat="keypoints"> Key Pointers</label>
+        <label class="toggle small muted"><input type="checkbox" data-cat="diagrams"> Diagrams & Graphs</label>
+        <label class="toggle small muted"><input type="checkbox" data-cat="tables"> Tables & Flowcharts</label>
+        <label class="toggle small muted"><input type="checkbox" data-cat="confusions"> Common Confusions</label>
+        <label class="toggle small muted"><input type="checkbox" data-cat="formulas"> Formulas</label>
+      </div>
+    </div>
             <div style="display:flex;gap:8px;">
               <select class="input" data-prop="level">
                 <option value="1"${b.level===1?' selected':''}>H1</option>
@@ -507,9 +518,53 @@
             </div>
           `;
         } else if(b.type === 'paragraph'){
-          body.innerHTML = `<textarea class="input" data-prop="text">${escapeHtml(b.text)}</textarea>`;
+          body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+<textarea class="input" data-prop="text">${escapeHtml(b.text)}</textarea>`;
         } else if(b.type === 'image'){
           body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+
             <div style="display:flex;gap:8px;">
               <input class="input" placeholder="Image URL" data-prop="url" value="${escapeHtml(b.url||'')}" />
               <button class="btn" data-act="upload">Upload</button>
@@ -518,6 +573,28 @@
           `;
         } else if(b.type === 'imageText'){
           body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+
             <div style="display:flex;gap:8px;">
               <input class="input" placeholder="Image URL" data-prop="imageUrl" value="${escapeHtml(b.imageUrl||'')}" />
               <button class="btn" data-act="upload">Upload</button>
@@ -526,7 +603,29 @@
             <div style="margin-top:8px"><textarea class="input" data-prop="text">${escapeHtml(b.text||'')}</textarea></div>
           `;
         } else if(b.type === 'bullets' || b.type === 'numbered'){
-          body.innerHTML = `<div data-list></div><div style="display:flex;gap:8px;margin-top:8px;"><input class="input" placeholder="New item" data-add /><button class="btn" data-act="addItem">Add</button></div>`;
+          body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+<div data-list></div><div style="display:flex;gap:8px;margin-top:8px;"><input class="input" placeholder="New item" data-add /><button class="btn" data-act="addItem">Add</button></div>`;
           const listDiv = body.querySelector('[data-list]');
           (b.items || []).forEach((it,i)=>{
             const row = document.createElement('div');
@@ -536,8 +635,30 @@
           });
         } else if(b.type === 'keypoints' || b.type === 'confusions'){
           body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+
             <div style="display:flex;gap:8px;align-items:center;">
-              <label class="toggle small muted"><input type="checkbox" data-prop="visible" ${b.toggles?.visible ? 'checked' : ''}/> Visible</label>
+        
             </div>
             <div data-list style="margin-top:8px"></div>
             <div style="display:flex;gap:8px;margin-top:8px;"><input class="input" placeholder="New item" data-add /><button class="btn" data-act="addItem">Add</button></div>
@@ -551,7 +672,29 @@
           });
         } else if(b.type === 'formulas'){
           body.innerHTML = `
-            <div style="display:flex;gap:8px;align-items:center;"><label class="toggle small muted"><input type="checkbox" data-prop="visible" ${b.toggles?.visible?'checked':''}/> Visible</label></div>
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+
+            <div style="display:flex;gap:8px;align-items:center;"></div>
             <div data-formulas style="margin-top:8px"></div>
             <div style="display:flex;gap:8px;margin-top:8px;"><input class="input" placeholder="LaTeX formula (e.g. \\frac{a}{b})" data-add /><button class="btn" data-act="addFormula">Add Formula</button></div>
           `;
@@ -563,15 +706,59 @@
           });
         } else if(b.type === 'tableImage'){
           body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+
             <div style="display:flex;gap:8px;">
               <input class="input" placeholder="Image URL" data-prop="url" value="${escapeHtml(b.url||'')}" />
               <button class="btn" data-act="upload">Upload</button>
             </div>
             <div style="margin-top:8px;"><input class="input" placeholder="Caption" data-prop="caption" value="${escapeHtml(b.caption||'')}" /></div>
-            <div style="margin-top:8px;"><label class="toggle small muted"><input type="checkbox" data-prop="visible" ${b.toggles?.visible?'checked':''}/> Visible</label></div>
+            <div style="margin-top:8px;"></div>
           `;
         } else if(b.type === 'example'){
           body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+
             <input class="input" data-prop="title" placeholder="Example title" value="${escapeHtml(b.title||'')}" />
             <div data-steps style="margin-top:8px"></div>
             <div style="display:flex;gap:8px;margin-top:8px;"><input class="input" placeholder="New step" data-add /><button class="btn" data-act="addStep">Add Step</button></div>
@@ -583,15 +770,62 @@
             sdiv.appendChild(row);
           });
         } else if(b.type === 'warning'){
-          body.innerHTML = `<textarea class="input" data-prop="text">${escapeHtml(b.text||'')}</textarea>`;
+          body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+
+          <textarea class="input" data-prop="text">${escapeHtml(b.text||'')}</textarea>`;
         } else {
-          body.innerHTML = `<div class="small muted">Unknown block type</div>`;
+          body.innerHTML = `
+          <!-- CATEGORY TAGS -->
+<div style="margin-bottom:10px;">
+  <div class="small muted" style="font-weight:600;margin-bottom:4px;">Categories</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="keypoints"> Key Pointers
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="diagrams"> Diagrams & Graphs
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="tables"> Tables & Flowcharts
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="confusions"> Common Confusions
+    </label>
+    <label class="toggle small muted">
+      <input type="checkbox" data-cat="formulas"> Formulas
+    </label>
+  </div>
+</div>
+<div class="small muted">Unknown block type</div>`;
         }
 
         // attach events in this block
         attachBlockEvents(b, card);
       });
     }
+    
+
 
     // ---------- Attach block events ----------
     function attachBlockEvents(block, cardEl){
@@ -698,6 +932,24 @@
           markDirty();
         });
       });
+      // CATEGORY CHECKBOXES
+cardEl.querySelectorAll('[data-cat]').forEach(box => {
+  const cat = box.dataset.cat;
+
+  // initial checked state
+  box.checked = block.categories?.includes(cat);
+
+  box.addEventListener('change', () => {
+    if (box.checked) {
+      if (!block.categories.includes(cat)) block.categories.push(cat);
+    } else {
+      block.categories = block.categories.filter(c => c !== cat);
+    }
+    markDirty();
+    renderPreview();
+  });
+});
+
     }
 
     // ---------- Render preview ----------
@@ -740,19 +992,15 @@
         const items = (b.items||[]).map(i=>`<li>${escapeHtml(i)}</li>`).join('');
         return `<ol style="margin:8px 0 8px 18px;color:var(--text-dark)">${items}</ol>`;
       } else if(b.type === 'keypoints'){
-        if(b.toggles?.visible === false) return '';
         const items = (b.items||[]).map(i=>`<li>${escapeHtml(i)}</li>`).join('');
         return `<div style="border-left:4px solid #f59e0b;padding:10px;margin:10px 0;background:rgba(245,158,11,0.04)"><strong>Key Points</strong><ul style="margin-top:8px">${items}</ul></div>`;
       } else if(b.type === 'confusions'){
-        if(b.toggles?.visible === false) return '';
         const items = (b.items||[]).map(i=>`<li>${escapeHtml(i)}</li>`).join('');
         return `<div style="border-left:4px solid #ef4444;padding:10px;margin:10px 0;background:rgba(239,68,68,0.03)"><strong>Common Confusions</strong><ul style="margin-top:8px">${items}</ul></div>`;
       } else if(b.type === 'formulas'){
-        if(b.toggles?.visible === false) return '';
         const frm = (b.formulas||[]).map(f=>`<div data-katex="${escapeAttr(f)}"></div>`).join('');
         return `<div style="margin:10px 0;padding:10px;border-radius:8px;background:rgba(255,255,255,0.01)"><strong>Formulas</strong>${frm}</div>`;
       } else if(b.type === 'tableImage'){
-        if(b.toggles?.visible === false) return '';
         return `<div style="margin:10px 0;"><img src="${escapeAttr(b.url||'')}" style="max-width:100%;border-radius:6px"/><div class="small muted">${escapeHtml(b.caption||'')}</div></div>`;
       } else if(b.type === 'example'){
         const steps = (b.steps||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join('');
