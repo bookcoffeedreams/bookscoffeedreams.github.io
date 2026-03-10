@@ -3,596 +3,1061 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Courses • Books Coffee and Dreams</title>
+  <title>Courses · Books Coffee Dreams</title>
 
-  <!-- Fonts + Tailwind -->
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Swiper -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
-  <!-- AOS -->
-  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
-
   <style>
-    :root{
-      --accent-from: #7c3aed;
-      --accent-to: #ec4899;
-      --glass-bg: rgba(255,255,255,0.12);
-      --glass-border: rgba(255,255,255,0.16);
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:       #faf6ef;
+      --warm-white:  #fff9f2;
+      --espresso:    #1a0f00;
+      --dark-roast:  #2d1b00;
+      --coffee:      #6b3f1a;
+      --latte:       #c4956a;
+      --caramel:     #e8b97e;
+      --foam:        #f5e6d0;
+      --sage:        #7a9e7e;
+      --muted:       #8a7060;
+      --border:      rgba(107,63,26,0.12);
+      --shadow-sm:   0 2px 8px rgba(26,15,0,0.06);
+      --shadow-md:   0 8px 28px rgba(26,15,0,0.09);
+      --shadow-lg:   0 20px 50px rgba(26,15,0,0.12);
     }
 
-    html,body { height:100%; }
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: 'Outfit', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      margin:0;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      background: linear-gradient(to bottom right, #ffffff 0%, #f3e8ff 35%, #f5e9ff 65%, #dbeafe 100%);
-      color: #0f172a;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--espresso);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* subtle glow blobs */
-    .blur-glow {
-      position: absolute;
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle at center, rgba(168,85,247,0.36), transparent);
-      filter: blur(84px);
-      z-index: 0;
-      pointer-events: none;
+    /* subtle paper texture */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999;
     }
 
-    /* NAVBAR: centered glass with max width */
-    .nav-glass {
-      position: fixed;
-      top: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 36px);
-      max-width: 1200px;
-      z-index: 60;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(12px) saturate(120%);
-      -webkit-backdrop-filter: blur(12px) saturate(120%);
-      border-radius: 14px;
-      box-shadow: 0 8px 26px rgba(16,24,40,0.06);
-      padding: 8px 16px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-height:56px;
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 48px;
+      height: 68px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+      background: rgba(250,246,239,0.88);
+      backdrop-filter: blur(20px) saturate(160%);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; flex-shrink: 0; }
+    .nav-brand img { width: 38px; height: 38px; border-radius: 10px; object-fit: cover; display: block; }
+    .nav-brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--espresso); letter-spacing: -0.01em;
+    }
+    .nav-brand-name span { color: var(--coffee); font-style: italic; }
+
+    .nav-links { display: flex; gap: 4px; align-items: center; }
+    .nav-links a {
+      padding: 7px 14px; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500;
+      color: var(--muted); text-decoration: none;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover { color: var(--espresso); background: var(--foam); }
+    .nav-links a.active {
+      color: var(--espresso); font-weight: 600;
+      background: var(--warm-white);
+      box-shadow: var(--shadow-sm);
     }
 
-    .brand { display:flex; align-items:center; gap:10px; flex-shrink:0; }
-    .brand img { display:block; width:48px; height:48px; border-radius:10px; object-fit:cover; }
-
-    .nav-links { display:flex; gap:10px; align-items:center; margin-left:6px; }
-    .nav-links a{
-      padding:8px 10px; border-radius:10px; font-weight:600; color: rgba(15,23,42,0.9); text-decoration:none; white-space:nowrap;
-    }
-    .nav-links a:hover { background: rgba(255,255,255,0.06); }
-    .nav-links a.active { background: rgba(255,255,255,0.92); color:#0f172a; box-shadow: 0 6px 18px rgba(15,23,42,0.06); }
-
-    /* Center search - clamp so it never overflows */
-    .nav-center { flex:1; display:flex; justify-content:center; pointer-events:none; }
     .nav-search {
-      pointer-events:auto;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:8px 12px;
-      border-radius:999px;
-      background: rgba(255,255,255,0.95);
-      box-shadow: 0 8px 30px rgba(15,23,42,0.06);
-      width: clamp(260px, 42vw, 620px);
-      max-width: calc(100% - 300px);
-      transition: transform .12s ease, box-shadow .12s ease;
-      min-width:220px;
+      display: flex; align-items: center; gap: 8px;
+      background: var(--warm-white);
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      padding: 8px 16px;
+      width: clamp(220px, 28vw, 380px);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .nav-search:focus-within { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(15,23,42,0.08); }
-    .nav-search input { border:0; outline:0; width:100%; background:transparent; font-weight:600; font-size:14px; color:#0f172a; }
-    .nav-search svg { color: #94a3b8; flex-shrink:0; }
+    .nav-search:focus-within { border-color: var(--coffee); box-shadow: 0 0 0 3px rgba(107,63,26,0.07); }
+    .nav-search svg { color: var(--muted); flex-shrink: 0; }
+    .nav-search input {
+      border: none; background: transparent; outline: none;
+      font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+      color: var(--espresso); width: 100%;
+    }
+    .nav-search input::placeholder { color: var(--muted); }
 
-    /* right area - compact */
-    .nav-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .profile-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      overflow: hidden; border: 2px solid var(--border);
+      display: block; text-decoration: none; flex-shrink: 0;
+      transition: border-color 0.2s;
+    }
+    .profile-btn:hover { border-color: var(--latte); }
+    .profile-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    .profile-btn { display:flex; align-items:center; justify-content:center; padding:6px; border-radius:999px; background: rgba(255,255,255,0.9); border:1px solid rgba(15,23,42,0.04); cursor:pointer; text-decoration:none; color:inherit; }
-    .profile-btn img { width:40px; height:40px; border-radius:999px; object-fit:cover; display:block; }
+    .mobile-menu-btn {
+      display: none; padding: 8px; border-radius: 8px;
+      background: var(--warm-white); border: 1px solid var(--border);
+      cursor: pointer;
+    }
 
-    .chip { background: rgba(15,23,42,0.06); padding:.25rem .5rem; border-radius:999px; font-size:.8rem; display:inline-block; }
-    .price-badge { background: linear-gradient(90deg, var(--accent-from), var(--accent-to)); color:white; border-radius:8px; padding:.25rem .5rem; font-weight:700; font-size:.85rem; }
-    .badge-featured { background: linear-gradient(90deg,#f97316,#a855f7); color:white; padding:.25rem .5rem; border-radius:8px; font-weight:700; font-size:.8rem; }
+    /* mobile menu */
+    .mobile-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200; background: rgba(26,15,0,0.35);
+    }
+    .mobile-panel {
+      position: absolute; top: 80px; right: 16px; width: 240px;
+      background: var(--warm-white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 12px; box-shadow: var(--shadow-lg);
+    }
+    .mobile-panel a {
+      display: block; padding: 10px 14px; border-radius: 10px;
+      font-size: 0.9rem; font-weight: 500; color: var(--espresso);
+      text-decoration: none; transition: background 0.15s;
+    }
+    .mobile-panel a:hover { background: var(--foam); }
+    .mobile-panel .divider { height: 1px; background: var(--border); margin: 8px 0; }
 
-    /* mobile */
-    .mobile-toggle { display:none; }
     @media (max-width: 900px) {
-      .nav-search { width: clamp(220px, 60vw, 420px); max-width: calc(100% - 140px); }
-      .nav-links{ display:none; }
-      .mobile-toggle { display:block; }
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
+      .nav-search { width: clamp(160px, 40vw, 260px); }
     }
     @media (max-width: 520px) {
-      .nav-glass { width: calc(100% - 20px); left: 10px; transform:none; top:10px; }
-      .nav-search { width: calc(100% - 120px); }
+      .nav-search { display: none; }
     }
 
-    main { padding-top: 100px; max-width: 1200px; margin:0 auto; }
-    .hero-card { background: linear-gradient(90deg, rgba(168,85,247,0.10), rgba(236,72,153,0.05)); border-radius:16px; box-shadow: 0 12px 40px rgba(124,58,237,0.06); }
+    /* ─── HERO ─── */
+    .hero {
+      padding: 120px 48px 60px;
+      max-width: 1280px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; padding: 110px 20px 48px; gap: 40px; }
+      .hero-swiper-wrap { display: none; }
+    }
 
-    /* course card styles */
-    .course-card { background:white; border-radius:12px; overflow:hidden; transition: transform .28s, box-shadow .28s; display:flex; flex-direction:column; }
-    .course-card:hover { transform: translateY(-8px); box-shadow: 0 24px 48px rgba(15,23,42,0.12); }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--foam); border: 1px solid var(--border);
+      border-radius: 100px; padding: 5px 14px;
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.07em; text-transform: uppercase; color: var(--coffee);
+      margin-bottom: 24px;
+    }
+    .hero-tag-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
+      animation: blink 2.2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.65)} }
 
-    /* list card specifics (medium width) */
-    .list-container { max-width:920px; margin-left:auto; margin-right:auto; display:flex; gap:16px; align-items:flex-start; }
-    .list-thumb { width:160px; height:100px; flex-shrink:0; border-radius:8px; object-fit:cover; }
-    .list-content { flex:1; display:flex; flex-direction:column; gap:8px; }
-    .list-top { display:flex; align-items:center; gap:12px; justify-content:space-between; }
-    .list-title { font-weight:700; font-size:1rem; color:#0f172a; }
-    .list-meta { color:#475569; font-size:.875rem; }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.6rem, 5vw, 4.4rem);
+      font-weight: 900; line-height: 1.02;
+      letter-spacing: -0.03em; color: var(--espresso);
+    }
+    .hero h1 em {
+      font-style: italic; color: var(--coffee);
+      position: relative; display: inline-block;
+    }
+    .hero h1 em::after {
+      content: ''; position: absolute;
+      left: 0; bottom: 3px; right: 0; height: 7px;
+      background: var(--caramel); opacity: 0.35;
+      border-radius: 4px; z-index: -1;
+    }
+    .hero-desc {
+      margin-top: 20px; font-size: 1rem; line-height: 1.7;
+      color: var(--muted); max-width: 440px;
+    }
 
-    /* make sure grid respects gap */
-    .grid-layout { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:1.25rem; }
-    @media (max-width: 1100px) { .grid-layout { grid-template-columns: repeat(2, minmax(0,1fr)); } }
-    @media (max-width: 640px) { .grid-layout { grid-template-columns: 1fr; } }
+    .hero-actions { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 26px; border-radius: 100px;
+      background: var(--espresso); color: var(--cream);
+      font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600;
+      border: none; cursor: pointer; letter-spacing: 0.01em;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: var(--coffee); transform: scale(1.02); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 26px; border-radius: 100px;
+      background: transparent; color: var(--espresso);
+      font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600;
+      border: 1.5px solid var(--border); cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--coffee); background: var(--foam); }
 
-    /* lightweight utility for button text */
-    .toggle-btn { min-width:160px; }
+    .hero-chips { display: flex; gap: 8px; margin-top: 28px; flex-wrap: wrap; }
+    .chip {
+      padding: 5px 14px; border-radius: 100px;
+      background: var(--warm-white); border: 1px solid var(--border);
+      font-size: 0.78rem; font-weight: 600; color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* Hero Swiper */
+    .hero-swiper-wrap { position: relative; }
+    .featuredSwiper { border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-lg); }
+    .swiper-slide img { width: 100%; height: 260px; object-fit: cover; display: block; }
+    .slide-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(26,15,0,0.55) 0%, transparent 55%);
+    }
+    .slide-text {
+      position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 22px;
+    }
+    .slide-teacher { font-size: 0.75rem; color: rgba(250,246,239,0.7); font-weight: 500; margin-bottom: 4px; }
+    .slide-title { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--cream); line-height: 1.25; }
+    .swiper-pagination-bullet { background: var(--cream) !important; opacity: 0.5 !important; }
+    .swiper-pagination-bullet-active { opacity: 1 !important; }
+
+    /* ─── FILTERS ─── */
+    .filter-bar {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 48px 40px;
+    }
+    @media (max-width: 900px) { .filter-bar { padding: 0 20px 32px; } }
+
+    .filter-inner {
+      background: var(--warm-white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px 24px;
+      display: flex; gap: 16px; align-items: center;
+      justify-content: space-between; flex-wrap: wrap;
+    }
+    .filter-left { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+    .filter-select {
+      appearance: none;
+      background: var(--cream) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a7060' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+      border: 1.5px solid var(--border); border-radius: 100px;
+      padding: 8px 32px 8px 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      color: var(--espresso); cursor: pointer; outline: none;
+      transition: border-color 0.2s;
+    }
+    .filter-select:focus { border-color: var(--coffee); }
+
+    .btn-reset {
+      padding: 8px 18px; border-radius: 100px;
+      background: transparent; border: 1.5px solid var(--border);
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      color: var(--muted); cursor: pointer; transition: all 0.2s;
+    }
+    .btn-reset:hover { border-color: var(--coffee); color: var(--coffee); }
+
+    .filter-right { display: flex; gap: 12px; align-items: center; }
+    .results-label { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+    .results-label strong { color: var(--espresso); font-weight: 600; }
+
+    .view-toggle {
+      display: flex; border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden;
+    }
+    .view-btn {
+      padding: 7px 12px; background: transparent; border: none;
+      cursor: pointer; color: var(--muted); transition: all 0.15s;
+      display: flex; align-items: center;
+    }
+    .view-btn.active { background: var(--espresso); color: var(--cream); }
+    .view-btn svg { width: 16px; height: 16px; }
+
+    /* ─── SECTION HEADERS ─── */
+    .section-wrap { max-width: 1280px; margin: 0 auto; padding: 0 48px; }
+    @media (max-width: 900px) { .section-wrap { padding: 0 20px; } }
+
+    .section-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--espresso); letter-spacing: -0.02em;
+    }
+    .section-sub { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+    /* ─── SKELETON ─── */
+    @keyframes shimmer {
+      0% { background-position: -600px 0; }
+      100% { background-position: 600px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, var(--foam) 25%, #ede0ce 50%, var(--foam) 75%);
+      background-size: 600px 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    .skeleton-card {
+      background: var(--warm-white); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .skeleton-img { height: 200px; }
+    .skeleton-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .skeleton-line { height: 14px; }
+    .skeleton-line.short { width: 55%; }
+    .skeleton-line.long { width: 85%; }
+
+    /* ─── COURSE CARDS ─── */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-bottom: 60px;
+    }
+    @media (max-width: 1100px) { .courses-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 640px) { .courses-grid { grid-template-columns: 1fr; } }
+
+    .courses-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 60px; }
+
+    /* GRID CARD */
+    .course-card {
+      background: var(--warm-white); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), box-shadow 0.28s;
+      cursor: pointer;
+      animation: fadeUp 0.5s ease both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .course-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+
+    .card-thumb {
+      position: relative; overflow: hidden;
+      background: var(--foam);
+    }
+    .card-thumb img {
+      width: 100%; height: 196px; object-fit: cover; display: block;
+      transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
+    }
+    .course-card:hover .card-thumb img { transform: scale(1.05); }
+
+    .card-badges { position: absolute; top: 14px; left: 14px; display: flex; gap: 6px; }
+    .badge {
+      padding: 3px 10px; border-radius: 100px;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .badge-featured { background: var(--espresso); color: var(--cream); }
+    .badge-free { background: var(--sage); color: #fff; }
+
+    .price-tag {
+      position: absolute; top: 14px; right: 14px;
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 4px 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.9rem; font-weight: 700; color: var(--espresso);
+    }
+    .price-tag.free { background: rgba(122,158,126,0.15); color: var(--sage); border-color: rgba(122,158,126,0.3); }
+
+    .card-body { padding: 20px 20px 16px; flex: 1; display: flex; flex-direction: column; }
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--espresso); line-height: 1.35;
+      letter-spacing: -0.01em; margin-bottom: 8px;
+    }
+    .card-desc {
+      font-size: 0.82rem; color: var(--muted); line-height: 1.6;
+      flex: 1; margin-bottom: 16px;
+    }
+    .card-meta {
+      display: flex; gap: 14px; align-items: center;
+      font-size: 0.75rem; color: var(--muted); font-weight: 500;
+      flex-wrap: wrap;
+    }
+    .meta-item { display: flex; align-items: center; gap: 4px; }
+    .meta-item svg { width: 13px; height: 13px; }
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 14px; border-top: 1px solid var(--border);
+      margin-top: 14px;
+    }
+    .teacher-pill {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.78rem; font-weight: 500; color: var(--muted);
+    }
+    .teacher-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--coffee); color: var(--cream);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    .open-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 100px;
+      background: var(--espresso); color: var(--cream);
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600;
+      border: none; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .open-btn:hover { background: var(--coffee); transform: scale(1.03); }
+    .open-btn svg { width: 12px; height: 12px; }
+
+    /* LIST CARD */
+    .list-card {
+      background: var(--warm-white); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      display: flex; align-items: stretch;
+      cursor: pointer;
+      transition: transform 0.22s, box-shadow 0.22s;
+      animation: fadeUp 0.4s ease both;
+    }
+    .list-card:hover { transform: translateX(4px); box-shadow: var(--shadow-md); }
+    .list-thumb {
+      width: 180px; flex-shrink: 0;
+      position: relative; overflow: hidden;
+    }
+    @media (max-width: 600px) { .list-thumb { width: 110px; } }
+    .list-thumb img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      transition: transform 0.4s;
+    }
+    .list-card:hover .list-thumb img { transform: scale(1.06); }
+    .list-body {
+      flex: 1; padding: 20px 22px;
+      display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
+    }
+    .list-top { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; }
+    .list-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--espresso); line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+    .list-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+    .list-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
+    .list-price {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem; font-weight: 700; color: var(--espresso);
+    }
+    .list-price.free { color: var(--sage); }
+
+    /* ─── LOAD MORE ─── */
+    .load-more-wrap { text-align: center; padding-bottom: 80px; }
+    .load-more-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 13px 36px; border-radius: 100px;
+      background: transparent; border: 1.5px solid var(--border);
+      font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600;
+      color: var(--espresso); cursor: pointer;
+      transition: all 0.2s;
+    }
+    .load-more-btn:hover { background: var(--espresso); color: var(--cream); border-color: var(--espresso); }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      text-align: center; padding: 80px 20px;
+      grid-column: 1 / -1;
+    }
+    .empty-icon {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: var(--foam); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .empty-icon svg { color: var(--latte); }
+    .empty-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem; font-weight: 700; color: var(--espresso);
+      margin-bottom: 8px;
+    }
+    .empty-sub { font-size: 0.875rem; color: var(--muted); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 48px;
+      max-width: 1280px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    @media (max-width: 640px) { footer { flex-direction: column; gap: 12px; padding: 28px 20px; text-align: center; } }
+    .footer-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem; font-weight: 700; color: var(--espresso);
+    }
+    .footer-brand span { color: var(--coffee); font-style: italic; }
+    .footer-copy { font-size: 0.78rem; color: var(--muted); }
+
+    /* divider */
+    .section-divider {
+      height: 1px; background: var(--border);
+      max-width: 1280px; margin: 0 auto 56px;
+      padding: 0 48px;
+    }
+    .section-divider-inner { height: 1px; background: var(--border); }
   </style>
 </head>
-<body class="min-h-screen relative overflow-x-hidden">
-
-  <!-- glow blobs -->
-  <div class="blur-glow top-12 left-8"></div>
-  <div class="blur-glow bottom-[360px] right-12"></div>
+<body>
 
   <!-- NAV -->
-  <nav class="nav-glass" role="navigation" aria-label="Main navigation">
-    <div class="brand">
-      <a href="index.html" class="flex items-center gap-3" aria-label="Home">
-        <img id="brandLogo" src="https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/logo.png"
-             alt="BCD logo"
-             onerror="this.src='https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/assets/images/account_logo_default.png'"/>
-      </a>
+  <nav role="navigation" aria-label="Main navigation">
+    <a href="index.html" class="nav-brand" aria-label="Home">
+      <img id="brandLogo"
+           src="https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/logo.png"
+           alt="Books Coffee Dreams logo"
+           onerror="this.style.display='none'" />
+      <span class="nav-brand-name">Books<span>Coffee</span>Dreams</span>
+    </a>
 
-      <div class="nav-links hidden md:flex ml-3" role="menubar" aria-label="Primary">
-        <a href="index.html" role="menuitem">Home</a>
-        <a href="courses.html" class="active" role="menuitem">Courses</a>
-        <a href="blogs.html" role="menuitem">Blogs</a>
-        <a href="community.html" role="menuitem">Community</a>
-      </div>
+    <div class="nav-links" role="menubar">
+      <a href="index.html" role="menuitem">Home</a>
+      <a href="courses.html" class="active" role="menuitem">Courses</a>
+      <a href="blogs.html" role="menuitem">Blogs</a>
+      <a href="community.html" role="menuitem">Community</a>
     </div>
 
-    <!-- centered search (Filters button inside) -->
-    <div class="nav-center" aria-hidden="false">
-      <div class="nav-search" role="search" aria-label="Search courses">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/>
-          <circle cx="11" cy="11" r="6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <input id="searchInput" type="search" placeholder="Search courses, topics, teachers..." aria-label="Search courses">
-        <button id="filtersBtn" title="Filters" class="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full border text-sm bg-white/50" aria-haspopup="true">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M10 12h4M6 18h12" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/></svg>
-          <span class="text-xs">Filters</span>
-        </button>
-      </div>
+    <div class="nav-search" role="search" aria-label="Search courses">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/>
+      </svg>
+      <input id="searchInput" type="search" placeholder="Search courses, topics, teachers…" aria-label="Search courses" />
     </div>
 
-    <!-- right -->
     <div class="nav-right">
-      <!-- removed grid/list here as requested, only avatar -->
       <a id="profileBtn" href="profile.html" class="profile-btn" aria-label="Profile">
-        <img id="profileAvatar" src="https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/assets/images/account_logo_default.png" alt="profile" />
+        <img id="profileAvatar"
+             src="https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/assets/icons/account_default.png"
+             alt="Profile" />
       </a>
-
-      <button id="mobileToggle" class="mobile-toggle p-2 rounded bg-white/90 border ml-1" aria-expanded="false" aria-label="Open menu">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/>
+      <button id="mobileToggle" class="mobile-menu-btn" aria-label="Open menu" aria-expanded="false">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
         </svg>
       </button>
     </div>
   </nav>
 
-  <!-- mobile popover -->
-  <div id="mobileMenu" class="hidden fixed inset-0 z-50 bg-black/40">
-    <div class="absolute top-24 right-4 w-[260px] bg-white rounded-lg shadow-lg p-4">
-      <div class="flex flex-col gap-2">
-        <a href="index.html" class="px-3 py-2 rounded hover:bg-slate-50">Home</a>
-        <a href="courses.html" class="px-3 py-2 rounded bg-slate-100">Courses</a>
-        <a href="blogs.html" class="px-3 py-2 rounded hover:bg-slate-50">Blogs</a>
-        <a href="community.html" class="px-3 py-2 rounded hover:bg-slate-50">Community</a>
-        <div class="border-t my-2"></div>
-        <a href="login.html" class="px-3 py-2 rounded hover:bg-slate-50">Log in</a>
-        <a href="signup.html" class="px-3 py-2 rounded hover:bg-slate-50">Sign up</a>
+  <!-- MOBILE MENU -->
+  <div id="mobileOverlay" class="mobile-overlay" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <div class="mobile-panel">
+      <a href="index.html">Home</a>
+      <a href="courses.html" style="font-weight:600;color:var(--espresso)">Courses</a>
+      <a href="blogs.html">Blogs</a>
+      <a href="community.html">Community</a>
+      <div class="divider"></div>
+      <a href="login.html">Log in</a>
+      <a href="signup.html">Sign up</a>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" aria-label="Page header">
+    <div class="hero-content">
+      <div class="hero-tag"><span class="hero-tag-dot"></span> Curated learning paths</div>
+      <h1>Learn with <em>intention</em>,<br>grow with clarity.</h1>
+      <p class="hero-desc">Hand-picked courses taught by expert educators — from competitive exam prep to creative thinking and beyond.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" id="showAllBtn">
+          Browse all courses
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-secondary" id="featuredScrollBtn">See featured</button>
+      </div>
+      <div class="hero-chips">
+        <span class="chip">JEE</span>
+        <span class="chip">NEET</span>
+        <span class="chip">Boards</span>
+        <span class="chip">Competitive</span>
+      </div>
+    </div>
+
+    <div class="hero-swiper-wrap">
+      <div class="swiper featuredSwiper">
+        <div class="swiper-wrapper" id="heroSwiperWrap"></div>
+        <div class="swiper-pagination"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILTERS -->
+  <div class="filter-bar" role="search" aria-label="Filter courses">
+    <div class="filter-inner">
+      <div class="filter-left">
+        <select id="filterExam" class="filter-select" aria-label="Filter by exam">
+          <option value="">All exams</option>
+          <option value="JEE">JEE</option>
+          <option value="NEET">NEET</option>
+          <option value="Boards">Boards</option>
+          <option value="Competitive">Competitive</option>
+        </select>
+
+        <select id="filterPrice" class="filter-select" aria-label="Filter by price">
+          <option value="">All prices</option>
+          <option value="free">Free only</option>
+          <option value="paid">Paid only</option>
+        </select>
+
+        <select id="sortBy" class="filter-select" aria-label="Sort courses">
+          <option value="featured">Featured first</option>
+          <option value="popular">Most popular</option>
+          <option value="new">Newest</option>
+          <option value="price_low">Price: Low to High</option>
+          <option value="price_high">Price: High to Low</option>
+        </select>
+
+        <button id="resetFilters" class="btn-reset">Reset</button>
+      </div>
+
+      <div class="filter-right">
+        <span class="results-label"><strong id="resultsCount">—</strong> courses</span>
+        <div class="view-toggle" role="group" aria-label="View mode">
+          <button id="gridViewBtn" class="view-btn active" aria-label="Grid view" title="Grid view">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </button>
+          <button id="listViewBtn" class="view-btn" aria-label="List view" title="List view">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- MAIN -->
-  <main class="max-w-7xl mx-auto px-6 pb-24 relative z-10">
-    <!-- HERO -->
-    <section class="hero-card p-8 md:p-12 rounded-2xl mb-10" data-aos="fade-up">
-      <div class="grid md:grid-cols-2 gap-6 items-center">
-        <div>
-          <h2 class="text-4xl md:text-5xl font-extrabold leading-tight text-slate-900">Premium courses for ambitious learners ✨</h2>
-          <p class="mt-4 text-lg text-slate-600">Curated study paths, video-led lessons, expert tutors and notes — built for clarity and results.</p>
-
-          <div class="mt-6 flex gap-3 flex-wrap">
-            <button id="showAllBtn" class="px-5 py-3 rounded-full" style="background:linear-gradient(90deg,var(--accent-from),var(--accent-to));color:#fff;font-weight:700;box-shadow:0 8px 30px rgba(124,58,237,0.08);">Browse all courses</button>
-            <button id="featuredScrollBtn" class="px-5 py-3 rounded-full bg-white border font-semibold">See featured</button>
-          </div>
-
-          <div class="mt-6 flex gap-2 items-center text-sm">
-            <div class="chip">JEE</div><div class="chip">NEET</div><div class="chip">Boards</div><div class="chip">Competitive</div>
-          </div>
-        </div>
-
-        <div class="hidden md:block">
-          <div class="swiper featuredSwiper rounded-xl overflow-hidden">
-            <div class="swiper-wrapper" id="heroFeaturedWrap"></div>
-            <div class="swiper-pagination"></div>
-          </div>
-        </div>
+  <!-- FEATURED SECTION -->
+  <section id="featuredSection" class="section-wrap" style="margin-bottom:56px" aria-label="Featured courses">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Featured Courses</div>
+        <div class="section-sub">Recommended by our educators</div>
       </div>
-    </section>
+    </div>
+    <div class="courses-grid" id="featuredGrid">
+      <!-- skeleton -->
+      <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-line long"></div><div class="skeleton skeleton-line short"></div></div></div>
+      <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-line long"></div><div class="skeleton skeleton-line short"></div></div></div>
+      <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton-body"><div class="skeleton skeleton-line long"></div><div class="skeleton skeleton-line short"></div></div></div>
+    </div>
+  </section>
 
-    <!-- FILTERS -->
-    <section class="mb-6">
-      <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        <div class="flex gap-3 flex-wrap">
-          <select id="filterExam" class="px-3 py-2 rounded-lg border">
-            <option value="">All exams</option>
-            <option value="JEE">JEE</option>
-            <option value="NEET">NEET</option>
-            <option value="Boards">Boards</option>
-            <option value="Competitive">Competitive</option>
-          </select>
+  <div class="section-divider"><div class="section-divider-inner"></div></div>
 
-          <select id="filterPrice" class="px-3 py-2 rounded-lg border">
-            <option value="">All prices</option>
-            <option value="free">Free</option>
-            <option value="paid">Paid</option>
-          </select>
-
-          <select id="sortBy" class="px-3 py-2 rounded-lg border">
-            <option value="featured">Sort: Featured</option>
-            <option value="popular">Sort: Popular</option>
-            <option value="new">Sort: New</option>
-            <option value="price_low">Price: Low → High</option>
-            <option value="price_high">Price: High → Low</option>
-          </select>
-
-          <button id="resetFilters" class="px-3 py-2 rounded-lg border">Reset</button>
-        </div>
-
-        <div class="flex gap-3 items-center">
-          <div class="text-sm text-slate-600">Showing <span id="resultsCount">0</span> courses</div>
-          <!-- Toggle View button (dynamic text) -->
-          <button id="toggleViewBtn" class="px-3 py-2 rounded-lg border toggle-btn">Switch to List View</button>
-        </div>
+  <!-- ALL COURSES SECTION -->
+  <section id="allCoursesSection" class="section-wrap" aria-label="All courses">
+    <div class="section-head">
+      <div>
+        <div class="section-title">All Courses</div>
+        <div class="section-sub" id="allCoursesSubLabel">Explore the full catalogue</div>
       </div>
-    </section>
+    </div>
+    <div id="coursesContainer"></div>
+    <div class="load-more-wrap">
+      <button id="loadMoreBtn" class="load-more-btn" style="display:none">
+        Load more courses
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </section>
 
-    <!-- Featured -->
-    <section id="featuredSection" class="mb-10">
-      <h3 class="text-xl font-bold mb-4">⭐ Featured Courses</h3>
-      <div class="grid lg:grid-cols-3 md:grid-cols-2 gap-6" id="featuredGrid"></div>
-    </section>
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">Books<span>Coffee</span>Dreams</div>
+    <p class="footer-copy">© 2025 BooksCoffeeDreams · Built with care</p>
+  </footer>
 
-    <!-- All Courses -->
-    <section id="allCoursesSection">
-      <h3 class="text-xl font-bold mb-4">All courses</h3>
-      <!-- container for grid OR centered list -->
-      <div id="coursesGridWrapper">
-        <div id="coursesGrid" class="grid-layout"></div>
-      </div>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-      <div class="mt-8 text-center">
-        <button id="loadMoreBtn" class="px-5 py-3 rounded-full border">Load more</button>
-      </div>
-    </section>
-  </main>
-
-  <!-- AOS -->
-  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-
-  <!-- FIREBASE + LOGIC -->
   <script type="module">
-  // Firebase modular SDK
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyACEG_4v-3ROgMNOlFZsAllC9VcYb8Nm2A",
-    authDomain: "bcd-discord.firebaseapp.com",
-    projectId: "bcd-discord",
-    storageBucket: "bcd-discord.appspot.com",
-    messagingSenderId: "278895155371",
-    appId: "1:278895155371:web:177a468f5fa3f0abfe3fee"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyACEG_4v-3ROgMNOlFZsAllC9VcYb8Nm2A",
+      authDomain: "bcd-discord.firebaseapp.com",
+      projectId: "bcd-discord",
+      storageBucket: "bcd-discord.appspot.com",
+      messagingSenderId: "278895155371",
+      appId: "1:278895155371:web:177a468f5fa3f0abfe3fee"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    const auth = getAuth(app);
 
-  // helper — FIX OBJ/STRING TEACHERS
-  function getTeacherNames(course) {
-    if (!course.teachers || course.teachers.length === 0) return "Not selected";
+    const DEFAULT_AVATAR = "https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/assets/icons/account_default.png";
+    const FALLBACK_IMG   = "https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/assets/courses/default_courses.png";
 
-    return course.teachers
-      .map(t => {
-        if (typeof t === "string") return t;
-        if (typeof t === "object" && t.name) return t.name;
-        return "Unknown";
-      })
-      .join(", ");
-  }
+    let allCourses   = [];
+    let visibleCount = 9;
+    let gridMode     = true;
+    let featuredSwiper = null;
 
-  // helpers
-  function escapeHtml(s=""){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
-  function formatPrice(v){ if (v===undefined||v===null||Number(v)===0) return "Free"; return `₹ ${Number(v).toLocaleString("en-IN")}`; }
+    // ── ELEMENTS
+    const featuredGrid    = document.getElementById('featuredGrid');
+    const heroSwiperWrap  = document.getElementById('heroSwiperWrap');
+    const coursesContainer= document.getElementById('coursesContainer');
+    const searchInput     = document.getElementById('searchInput');
+    const filterExam      = document.getElementById('filterExam');
+    const filterPrice     = document.getElementById('filterPrice');
+    const sortBy          = document.getElementById('sortBy');
+    const resultsCount    = document.getElementById('resultsCount');
+    const loadMoreBtn     = document.getElementById('loadMoreBtn');
+    const gridViewBtn     = document.getElementById('gridViewBtn');
+    const listViewBtn     = document.getElementById('listViewBtn');
+    const resetFilters    = document.getElementById('resetFilters');
+    const profileAvatar   = document.getElementById('profileAvatar');
+    const allCoursesSubLabel = document.getElementById('allCoursesSubLabel');
 
-  const DEFAULT_AVATAR = "https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/assets/images/account_logo_default.png";
-  const FALLBACK_IMG = "https://raw.githubusercontent.com/bookscoffeedreams/bookscoffeedreams.github.io/main/assets/images/prarambh_3.0.png";
+    // ── HELPERS
+    function esc(s='') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function formatPrice(v) { return (!v || Number(v)===0) ? 'Free' : `₹${Number(v).toLocaleString('en-IN')}`; }
+    function isPaid(c) { return c.isPaid && Number(c.price) > 0; }
 
-  let allCourses = [];
-  let visibleCount = 9;
-  let featuredSwiper = null;
-  let gridMode = true;
+    function getTeacherName(course) {
+      if (!course.teachers || course.teachers.length === 0) return '';
+      return course.teachers.map(t => {
+        if (typeof t === 'string') return t;
+        if (typeof t === 'object' && t.name) return t.name;
+        return '';
+      }).filter(Boolean).join(', ');
+    }
 
-  const featuredGrid = document.getElementById('featuredGrid');
-  const featuredSwiperWrap = document.getElementById('heroFeaturedWrap');
-  const coursesGrid = document.getElementById('coursesGrid');
-  const filterExam = document.getElementById('filterExam');
-  const filterPrice = document.getElementById('filterPrice');
-  const sortBy = document.getElementById('sortBy');
-  const searchInput = document.getElementById('searchInput');
-  const resultsCount = document.getElementById('resultsCount');
-  const loadMoreBtn = document.getElementById('loadMoreBtn');
-  const showAllBtn = document.getElementById('showAllBtn');
-  const featuredScrollBtn = document.getElementById('featuredScrollBtn');
-  const toggleViewBtn = document.getElementById('toggleViewBtn');
-  const resetFilters = document.getElementById('resetFilters');
-  const filtersBtn = document.getElementById('filtersBtn');
-  const profileAvatar = document.getElementById('profileAvatar');
+    function teacherInitials(name) {
+      if (!name) return 'BC';
+      return name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+    }
 
-  // GRID CARD — FIXED TEACHERS
-  function makeCourseCardGrid(course){
-    const teachers = escapeHtml(getTeacherNames(course));
-    const card = document.createElement('article');
-    card.className = 'course-card p-4';
+    function navigate(id) { window.location.href = `course-detail.html?id=${id}`; }
 
-    card.innerHTML = `
-      <div class="relative overflow-hidden rounded-md">
-        <img loading="lazy" src="${course.thumbnailURL||FALLBACK_IMG}" class="w-full h-44 object-cover rounded-md" />
-        <div class="absolute top-3 left-3">${course.featured?'<span class="badge-featured">Featured</span>':''}</div>
-        <div class="absolute top-3 right-3">${course.isPaid?`<span class="price-badge">${formatPrice(course.price)}</span>`:`<span class="chip">Free</span>`}</div>
-      </div>
-      <div class="mt-3">
-        <h3 class="text-lg font-semibold">${escapeHtml(course.title)}</h3>
-        <p class="text-sm text-slate-700 mt-1">${escapeHtml((course.description||'').slice(0,110))}${course.description.length>110?'...':''}</p>
-        <div class="mt-3 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <div class="chip text-xs">${teachers}</div>
-            <div class="text-xs text-slate-500">${escapeHtml(course.duration||'')}</div>
+    // ── MAKE GRID CARD
+    function makeGridCard(course) {
+      const card = document.createElement('article');
+      card.className = 'course-card';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', esc(course.title));
+
+      const teacher  = getTeacherName(course);
+      const paid     = isPaid(course);
+      const priceStr = paid ? `₹${Number(course.price).toLocaleString('en-IN')}` : 'Free';
+      const thumb    = course.thumbnailURL || FALLBACK_IMG;
+      const desc     = (course.description || '').slice(0, 100) + ((course.description||'').length > 100 ? '…' : '');
+
+      card.innerHTML = `
+        <div class="card-thumb">
+          <img src="${esc(thumb)}" alt="${esc(course.title)}" loading="lazy"
+               onerror="this.src='${FALLBACK_IMG}'" />
+          <div class="card-badges">
+            ${course.featured ? '<span class="badge badge-featured">Featured</span>' : ''}
+            ${!paid           ? '<span class="badge badge-free">Free</span>'         : ''}
           </div>
-          <button class="openCourseBtn px-3 py-1 rounded bg-white border text-xs">Open</button>
+          <div class="price-tag ${paid ? '' : 'free'}">${priceStr}</div>
         </div>
-      </div>`;
-
-    card.querySelector('.openCourseBtn').onclick = ()=> 
-      window.location.href=`course-detail.html?id=${course.id}`;
-
-    return card;
-  }
-
-  // LIST CARD — FIXED TEACHERS
-  function makeCourseCardList(course){
-    const wrapper = document.createElement('div');
-    wrapper.className = 'list-container';
-
-    const teachers = escapeHtml(getTeacherNames(course));
-
-    wrapper.innerHTML = `
-      <img class="list-thumb" src="${course.thumbnailURL||FALLBACK_IMG}" />
-      <div class="list-content">
-        <div class="list-top">
-          <div style="flex:1">
-            <div class="list-title">${escapeHtml(course.title)}</div>
-            <div class="list-meta">${teachers} • ${escapeHtml(course.duration||'')}</div>
+        <div class="card-body">
+          <div class="card-title">${esc(course.title)}</div>
+          <div class="card-desc">${esc(desc)}</div>
+          <div class="card-meta">
+            ${course.duration ? `<span class="meta-item">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg>
+              ${esc(course.duration)}
+            </span>` : ''}
+            ${(course.tags||[]).slice(0,2).map(t => `<span class="meta-item">${esc(t)}</span>`).join('')}
           </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-            <div class="price-badge" style="padding:.32rem .5rem;font-size:.85rem;">${course.isPaid?formatPrice(course.price):'Free'}</div>
-            <button class="px-3 py-1 rounded bg-white border text-xs">Open</button>
-          </div>
-        </div>
-        <div style="color:#475569;font-size:.95rem;line-height:1.35;">${escapeHtml((course.description||'').slice(0,250))}</div>
-      </div>
-    `;
-
-    wrapper.querySelector('button').onclick = ()=> 
-      window.location.href = `course-detail.html?id=${course.id}`;
-
-    return wrapper;
-  }
-
-  // LOAD COURSES
-  async function loadCoursesFromFirestore(){
-    const q = query(collection(db,'courses'), orderBy('createdAt','desc'));
-    const snaps = await getDocs(q);
-
-    allCourses = snaps.docs.map(s=>{
-      const d = s.data();
-      return {
-        id: s.id,
-        title: d.title || 'Untitled',
-        description: d.description || '',
-        thumbnailURL: d.thumbnailURL || '',
-        price: d.price ?? 0,
-        isPaid: !!d.isPaid,
-        featured: !!d.featured,
-        teachers: d.teachers || [],
-        tags: d.tags || [],
-        xp: d.xp ?? 0,
-        popularity: d.popularity ?? 0,
-        createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : d.createdAt.seconds*1000) : 0,
-        duration: d.duration || ''
-      };
-    });
-
-    renderAllViews();
-  }
-
-  // RENDER EVERYTHING
-  function renderAllViews(){
-    featuredGrid.innerHTML = '';
-    featuredSwiperWrap.innerHTML = '';
-    coursesGrid.innerHTML = '';
-
-    const featured = allCourses.filter(c=>c.featured).slice(0,6);
-
-    // HERO SLIDER — FIXED TEACHERS
-    featured.forEach(c=>{
-      const slide = document.createElement('div');
-      slide.className='swiper-slide';
-
-      slide.innerHTML = `
-        <div class="relative rounded-lg overflow-hidden h-48">
-          <img src="${c.thumbnailURL||FALLBACK_IMG}" class="w-full h-full object-cover">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-          <div class="absolute bottom-4 left-4 text-white">
-            <div class="text-sm font-semibold">${escapeHtml(getTeacherNames(c))}</div>
-            <div class="text-xl font-bold">${escapeHtml(c.title)}</div>
+          <div class="card-footer">
+            <div class="teacher-pill">
+              <div class="teacher-dot">${teacherInitials(teacher)}</div>
+              <span>${esc(teacher || 'Books Coffee Dreams')}</span>
+            </div>
+            <button class="open-btn" data-id="${esc(course.id)}">
+              Open
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
           </div>
         </div>`;
 
-      featuredSwiperWrap.appendChild(slide);
-    });
+      card.querySelector('.open-btn').addEventListener('click', (e) => { e.stopPropagation(); navigate(course.id); });
+      card.addEventListener('click', () => navigate(course.id));
+      card.addEventListener('keydown', (e) => { if(e.key==='Enter'||e.key===' ') navigate(course.id); });
+      return card;
+    }
 
-    // Featured Grid
-    featured.forEach(c=> featuredGrid.appendChild(makeCourseCardGrid(c)));
+    // ── MAKE LIST CARD
+    function makeListCard(course) {
+      const card = document.createElement('article');
+      card.className = 'list-card';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', esc(course.title));
 
-    initFeaturedSwiper();
-    renderCoursesGrid();
-    resultsCount.textContent = allCourses.length;
-  }
+      const teacher  = getTeacherName(course);
+      const paid     = isPaid(course);
+      const priceStr = paid ? `₹${Number(course.price).toLocaleString('en-IN')}` : 'Free';
+      const thumb    = course.thumbnailURL || FALLBACK_IMG;
+      const desc     = (course.description || '').slice(0, 200) + ((course.description||'').length > 200 ? '…' : '');
 
-  // RENDER COURSE GRID/LIST
-  function renderCoursesGrid(){
-    coursesGrid.innerHTML = '';
+      card.innerHTML = `
+        <div class="list-thumb">
+          <img src="${esc(thumb)}" alt="${esc(course.title)}" loading="lazy"
+               onerror="this.src='${FALLBACK_IMG}'" />
+        </div>
+        <div class="list-body">
+          <div class="list-top">
+            <div>
+              <div class="list-title">${esc(course.title)}</div>
+              <div style="font-size:.78rem;color:var(--muted);margin-top:4px;font-weight:500;">
+                ${esc(teacher || 'Books Coffee Dreams')}
+                ${course.duration ? ` · ${esc(course.duration)}` : ''}
+              </div>
+            </div>
+            <div class="list-right">
+              <div class="list-price ${paid ? '' : 'free'}">${priceStr}</div>
+              <button class="open-btn" data-id="${esc(course.id)}">
+                Open
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="list-desc">${esc(desc)}</div>
+        </div>`;
 
-    let filtered = [...allCourses];
+      card.querySelector('.open-btn').addEventListener('click', (e) => { e.stopPropagation(); navigate(course.id); });
+      card.addEventListener('click', () => navigate(course.id));
+      card.addEventListener('keydown', (e) => { if(e.key==='Enter'||e.key===' ') navigate(course.id); });
+      return card;
+    }
 
-    const q = searchInput.value.toLowerCase().trim();
-    const exam = filterExam.value;
-    const price = filterPrice.value;
-    const sort = sortBy.value;
+    // ── HERO SWIPER
+    function buildHeroSwiper(featured) {
+      heroSwiperWrap.innerHTML = '';
+      featured.forEach(c => {
+        const slide = document.createElement('div');
+        slide.className = 'swiper-slide';
+        slide.style.position = 'relative';
+        slide.innerHTML = `
+          <img src="${esc(c.thumbnailURL||FALLBACK_IMG)}" alt="${esc(c.title)}"
+               style="width:100%;height:260px;object-fit:cover;display:block;border-radius:20px;"
+               onerror="this.src='${FALLBACK_IMG}'" />
+          <div class="slide-overlay" style="border-radius:20px"></div>
+          <div class="slide-text">
+            <div class="slide-teacher">${esc(getTeacherName(c) || 'Books Coffee Dreams')}</div>
+            <div class="slide-title">${esc(c.title)}</div>
+          </div>`;
+        heroSwiperWrap.appendChild(slide);
+      });
 
-    filtered = filtered.filter(c=>{
-      const hay = `${c.title} ${c.description} ${getTeacherNames(c)} ${(c.tags||[]).join(' ')}`.toLowerCase();
-      if(q && !hay.includes(q)) return false;
-      if(exam && !(c.tags||[]).map(x=>x.toLowerCase()).includes(exam.toLowerCase())) return false;
-      if(price==='free' && c.isPaid) return false;
-      if(price==='paid' && !c.isPaid) return false;
-      return true;
-    });
-
-    if(sort==='popular') filtered.sort((a,b)=> b.popularity-a.popularity);
-    if(sort==='new') filtered.sort((a,b)=> b.createdAt-a.createdAt);
-    if(sort==='price_low') filtered.sort((a,b)=> a.price-b.price);
-    if(sort==='price_high') filtered.sort((a,b)=> b.price-a.price);
-    if(sort==='featured') filtered.sort((a,b)=> (b.featured?1:0)-(a.featured?1:0));
-
-    const slice = filtered.slice(0,visibleCount);
-
-    if(gridMode){
-      coursesGrid.className='grid-layout';
-      slice.forEach(c=> coursesGrid.appendChild(makeCourseCardGrid(c)));
-    } else {
-      coursesGrid.className='';
-      slice.forEach(c=>{
-        const shell=document.createElement('div');
-        shell.className='p-4 bg-white rounded-lg shadow-sm';
-        shell.appendChild(makeCourseCardList(c));
-        coursesGrid.appendChild(shell);
+      if (featuredSwiper) { try { featuredSwiper.destroy(true,true); } catch(e){} }
+      featuredSwiper = new Swiper('.featuredSwiper', {
+        slidesPerView: 1, loop: true,
+        autoplay: { delay: 4000, disableOnInteraction: false },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        effect: 'fade', fadeEffect: { crossFade: true }
       });
     }
 
-    resultsCount.textContent = filtered.length;
-    loadMoreBtn.style.display = filtered.length > visibleCount ? 'inline-block' : 'none';
-  }
+    // ── RENDER FEATURED
+    function renderFeatured() {
+      const featured = allCourses.filter(c => c.featured).slice(0, 6);
+      featuredGrid.innerHTML = '';
 
-  // INIT SWIPER
-  async function initFeaturedSwiper(){
-    if(typeof Swiper === 'undefined'){
-      await new Promise(res=>{
-        const s=document.createElement('script');
-        s.src='https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
-        s.onload=res;
-        document.head.appendChild(s);
-      });
-    }
-    if(featuredSwiper){
-      try{ featuredSwiper.destroy(true,true); }catch(e){}
-    }
-    featuredSwiper = new Swiper('.featuredSwiper',{slidesPerView:1,loop:true,autoplay:{delay:4200},pagination:{el:'.swiper-pagination',clickable:true}});
-  }
-
-  // Toggle View Button
-  function updateToggleText(){
-    toggleViewBtn.textContent = gridMode ? "Switch to List View" : "Switch to Grid View";
-  }
-  toggleViewBtn.onclick = ()=>{
-    gridMode = !gridMode;
-    updateToggleText();
-    renderCoursesGrid();
-  };
-  updateToggleText();
-
-  // Filter Events
-  function debounce(fn,ms=200){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
-  searchInput.addEventListener('input',debounce(renderCoursesGrid,250));
-  filterExam.onchange = filterPrice.onchange = sortBy.onchange = renderCoursesGrid;
-  resetFilters.onclick = ()=>{
-    searchInput.value='';
-    filterExam.value='';
-    filterPrice.value='';
-    sortBy.value='featured';
-    visibleCount=9;
-    renderCoursesGrid();
-  };
-  loadMoreBtn.onclick = ()=>{ visibleCount+=9; renderCoursesGrid(); };
-  showAllBtn.onclick = ()=>{ visibleCount=999; renderCoursesGrid(); };
-  featuredScrollBtn.onclick = ()=> window.scrollTo({top:document.getElementById('featuredSection').offsetTop-80,behavior:'smooth'});
-
-  // AUTH
-  onAuthStateChanged(auth, async (user)=>{
-    if(user){
-      let finalPhoto = user.photoURL || DEFAULT_AVATAR;
-
-      const uSnap = await getDoc(doc(db,"users",user.uid));
-      if(uSnap.exists() && uSnap.data().profileURL){
-        finalPhoto = uSnap.data().profileURL;
+      if (featured.length === 0) {
+        document.getElementById('featuredSection').style.display = 'none';
+        document.querySelector('.section-divider').style.display = 'none';
+        return;
       }
 
-      profileAvatar.src = finalPhoto;
-      profileAvatar.onerror = ()=> profileAvatar.src = DEFAULT_AVATAR;
+      featured.forEach((c, i) => {
+        const card = makeGridCard(c);
+        card.style.animationDelay = `${i * 0.07}s`;
+        featuredGrid.appendChild(card);
+      });
+
+      buildHeroSwiper(featured);
     }
-    loadCoursesFromFirestore();
-  });
 
-  AOS.init({duration:900,once:true,offset:40});
-</script>
+    // ── RENDER ALL (filtered)
+    function renderCourses() {
+      let filtered = [...allCourses];
 
-  <!-- AOS, Sweetalert -->
-  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- Swiper fallback -->
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+      const q     = searchInput.value.toLowerCase().trim();
+      const exam  = filterExam.value;
+      const price = filterPrice.value;
+      const sort  = sortBy.value;
+
+      filtered = filtered.filter(c => {
+        const hay = `${c.title} ${c.description} ${getTeacherName(c)} ${(c.tags||[]).join(' ')}`.toLowerCase();
+        if (q && !hay.includes(q)) return false;
+        if (exam && !(c.tags||[]).map(x => x.toLowerCase()).includes(exam.toLowerCase())) return false;
+        if (price === 'free' && isPaid(c)) return false;
+        if (price === 'paid' && !isPaid(c)) return false;
+        return true;
+      });
+
+      if (sort === 'popular') filtered.sort((a,b) => b.popularity - a.popularity);
+      else if (sort === 'new') filtered.sort((a,b) => b.createdAt - a.createdAt);
+      else if (sort === 'price_low') filtered.sort((a,b) => a.price - b.price);
+      else if (sort === 'price_high') filtered.sort((a,b) => b.price - a.price);
+      else filtered.sort((a,b) => (b.featured?1:0) - (a.featured?1:0));
+
+      resultsCount.textContent = filtered.length;
+      allCoursesSubLabel.textContent = filtered.length === allCourses.length
+        ? 'Explore the full catalogue'
+        : `${filtered.length} of ${allCourses.length} courses match your filters`;
+
+      const slice = filtered.slice(0, visibleCount);
+      coursesContainer.innerHTML = '';
+
+      if (slice.length === 0) {
+        const wrap = document.createElement('div');
+        wrap.className = 'courses-grid';
+        wrap.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="empty-title">No courses found</div>
+            <div class="empty-sub">Try adjusting your filters or search term</div>
+          </div>`;
+        coursesContainer.appendChild(wrap);
+        loadMoreBtn.style.display = 'none';
+        return;
+      }
+
+      if (gridMode) {
+        const grid = document.createElement('div');
+        grid.className = 'courses-grid';
+        slice.forEach((c, i) => {
+          const card = makeGridCard(c);
+          card.style.animationDelay = `${i * 0.05}s`;
+          grid.appendChild(card);
+        });
+        coursesContainer.appendChild(grid);
+      } else {
+        const list = document.createElement('div');
+        list.className = 'courses-list';
+        slice.forEach((c, i) => {
+          const card = makeListCard(c);
+          card.style.animationDelay = `${i * 0.04}s`;
+          list.appendChild(card);
+        });
+        coursesContainer.appendChild(list);
+      }
+
+      loadMoreBtn.style.display = filtered.length > visibleCount ? 'inline-flex' : 'none';
+    }
+
+    // ── LOAD FROM FIRESTORE
+    async function loadCourses() {
+      const q = query(collection(db, 'courses'), orderBy('createdAt', 'desc'));
+      const snaps = await getDocs(q);
+
+      allCourses = snaps.docs.map(s => {
+        const d = s.data();
+        return {
+          id: s.id,
+          title: d.title || 'Untitled',
+          description: d.description || '',
+          thumbnailURL: d.thumbnailURL || '',
+          price: d.price ?? 0,
+          isPaid: !!d.isPaid,
+          featured: !!d.featured,
+          teachers: d.teachers || [],
+          tags: d.tags || [],
+          xp: d.xp ?? 0,
+          popularity: d.popularity ?? 0,
+          createdAt: d.createdAt
+            ? (d.createdAt.toMillis ? d.createdAt.toMillis() : d.createdAt.seconds * 1000)
+            : 0,
+          duration: d.duration || ''
+        };
+      });
+
+      renderFeatured();
+      renderCourses();
+    }
+
+    // ── EVENTS
+    function debounce(fn, ms=220) { let t; return(...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+    searchInput.addEventListener('input', debounce(() => { visibleCount = 9; renderCourses(); }, 250));
+    filterExam.onchange  = () => { visibleCount = 9; renderCourses(); };
+    filterPrice.onchange = () => { visibleCount = 9; renderCourses(); };
+    sortBy.onchange      = () => { visibleCount = 9; renderCourses(); };
+
+    resetFilters.onclick = () => {
+      searchInput.value = '';
+      filterExam.value  = '';
+      filterPrice.value = '';
+      sortBy.value      = 'featured';
+      visibleCount      = 9;
+      renderCourses();
+    };
+
+    loadMoreBtn.onclick = () => { visibleCount += 9; renderCourses(); };
+
+    document.getElementById('showAllBtn').onclick = () => {
+      visibleCount = 9999;
+      renderCourses();
+      document.getElementById('allCoursesSection').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    document.getElementById('featuredScrollBtn').onclick = () => {
+      document.getElementById('featuredSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    gridViewBtn.onclick = () => {
+      gridMode = true;
+      gridViewBtn.classList.add('active');
+      listViewBtn.classList.remove('active');
+      renderCourses();
+    };
+    listViewBtn.onclick = () => {
+      gridMode = false;
+      listViewBtn.classList.add('active');
+      gridViewBtn.classList.remove('active');
+      renderCourses();
+    };
+
+    // Mobile menu
+    const mobileToggle  = document.getElementById('mobileToggle');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    mobileToggle.onclick = () => {
+      const open = mobileOverlay.style.display === 'block';
+      mobileOverlay.style.display = open ? 'none' : 'block';
+      mobileToggle.setAttribute('aria-expanded', String(!open));
+    };
+    mobileOverlay.addEventListener('click', (e) => {
+      if (e.target === mobileOverlay) mobileOverlay.style.display = 'none';
+    });
+
+    // ── AUTH + LOAD
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        let photo = user.photoURL || DEFAULT_AVATAR;
+        try {
+          const snap = await getDoc(doc(db, 'users', user.uid));
+          if (snap.exists() && snap.data().profileURL) photo = snap.data().profileURL;
+        } catch(e) {}
+        profileAvatar.src = photo;
+        profileAvatar.onerror = () => { profileAvatar.src = DEFAULT_AVATAR; };
+      }
+      loadCourses();
+    });
+  </script>
 </body>
 </html>
